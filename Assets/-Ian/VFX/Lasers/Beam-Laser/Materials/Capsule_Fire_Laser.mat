@@ -1,0 +1,101 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Capsule_Fire_Laser
+  m_Shader: {fileID: -6465566751694194690, guid: 9dd2cc31e921d2a46ab28e01f7020041,
+    type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses:
+  - MOTIONVECTORS
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Noise_Tex:
+        m_Texture: {fileID: 2800000, guid: 048d16cb00851ee4d95e624433568246, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Primary_Shape_Texture:
+        m_Texture: {fileID: 2800000, guid: ddebe61fbb4173149a5ed500ef297b6c, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Secondary_Shape_Texture:
+        m_Texture: {fileID: 2800000, guid: 7c05e966fef446a48ba5758ef13f0c97, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _Alpha_Cutoff: 0.53
+    - _Color_Offset_Primary: 1.77
+    - _Color_Offset_Secondary: -0.11
+    - _Color_Stretch_Primary: -2.25
+    - _Color_Stretch_Secondary: 1
+    - _Cutoff_Primary: 0.141
+    - _Cutoff_Secondary: 0.551
+    - _Lerp_Noise_In_Primary_Shape: 0.49
+    - _Move_Speed_Noise: 0.26
+    - _Move_Speed_Primary: 0.32
+    - _Move_Speed_Secondary: 0.28
+    - _Noise_Distort_Strength_Primary: 0.16
+    - _Noise_Distort_Strength_Secondary: 0.08
+    - _Noise_Scale: 1.12
+    - _Primary_Beam_Smoothness: 0.17
+    - _Primary_Beam_Width: 0.817
+    - _Primary_Texture_Scale: 2.88
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _RimPower_Beams: 0.96
+    - _RimPower_Falloff_Alpha: 0.09
+    - _RotateUV: 1
+    - _Secondary_Beam_Smoothness: 0.42
+    - _Secondary_Beam_Width: 0.448
+    - _Secondary_Texture_Scale: 0.92
+    - _Shape_Intensity: 1.11
+    - _Smoothness_Primary: 0.55
+    - _Smoothness_Secondary: 0.12
+    - _UseRim: 1
+    m_Colors:
+    - _Primary_Color_1: {r: 6.4222345, g: 1.1740959, b: 0.10087261, a: 1}
+    - _Primary_Color_2: {r: 0.89757407, g: 0.78165, b: 0.6955594, a: 1}
+    - _Secondary_Color_1: {r: 0.10625509, g: 0.0027208095, b: 0.021150993, a: 1}
+    - _Secondary_Color_2: {r: 2.8902583, g: 0.9133673, b: 0.7439881, a: 1}
+  m_BuildTextureStacks: []
+--- !u!114 &8931097033249801756
+MonoBehaviour:
+  m_ObjectHideFlags: 11
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0353a89b1f911e48b9e16bdc9f2e058, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Editor::UnityEditor.Rendering.Universal.AssetVersion
+  version: 10

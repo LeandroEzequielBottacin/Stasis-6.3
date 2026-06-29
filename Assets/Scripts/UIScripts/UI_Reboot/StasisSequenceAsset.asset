@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d90ac63684621194c8d250a4c6d95be0, type: 3}
+  m_Name: StasisSequenceAsset
+  m_EditorClassIdentifier: 
+  steps:
+  - text: ">> STASIS HARDWARE ACQUIRED_\r\n[HW ] STASIS CORE............. [OK]\r\n[HW
+      ] TEMPORAL ANCHOR......... [OK]\r\n\r\n----------------------------------------------\r\n 
+      STASIS CHARGES AVAILABLE_: 2\r\n  ENERGY RESERVES_: \u2588\u2588\u2592\u2592\u2592\u2592
+      42%\r\n"
+    typingSpeed: 0
+    afterDelay: 1e-11
+    playTypeBeep: 0
+    playLineBeep: 1
+  defaultTypingSpeed: 0.003
+  defaultAfterDelay: 0.01
+  typeBeep: {fileID: 0}
+  lineBeep: {fileID: 0}
+  finishSfx: {fileID: 0}
+  autoFadeOut: 1
+  fadeDelay: 1
+  fadeDuration: 0.75

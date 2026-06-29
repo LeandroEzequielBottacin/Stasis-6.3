@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 612e70f49e5124da0a95111a57250300, type: 3}
+  m_Name: TrainFog_LevelTest
+  m_EditorClassIdentifier: 
+  raymarchQuality: 5
+  dithering: 0.96
+  jittering: 0.99
+  renderQueue: 3100
+  sortingLayerID: 0
+  sortingOrder: 0
+  noiseTexture: {fileID: 2800000, guid: 0d0cf86bffcba452bbdb084db58a390a, type: 3}
+  noiseStrength: 0
+  noiseScale: 0.5
+  noiseFinalMultiplier: 1
+  useDetailNoise: 1
+  detailTexture: {fileID: 11700000, guid: 950add8d241c6479bbab1f10e1035d60, type: 2}
+  detailScale: 0.35
+  detailStrength: 1
+  density: 0.01
+  shape: 0
+  border: 1
+  verticalOffset: 0
+  distance: 0
+  distanceFallOff: 0
+  albedo: {r: 1, g: 0.8441375, b: 0, a: 1}
+  brightness: 2
+  deepObscurance: 1
+  specularColor: {r: 1, g: 1, b: 1, a: 1}
+  specularThreshold: 0.637
+  specularIntensity: 0.428
+  turbulence: 1
+  windDirection: {x: 0.075, y: 0, z: 0}
+  lightDiffusionPower: 64
+  lightDiffusionIntensity: 0
+  receiveShadows: 1
+  shadowIntensity: 0.85

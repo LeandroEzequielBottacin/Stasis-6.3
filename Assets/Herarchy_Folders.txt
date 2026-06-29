@@ -1,0 +1,51 @@
+Assets/
+│
+├── _ProjectSettings/           <- Configuraciones de Unity
+│
+├── Art/
+│   ├── Blender/                <- Archivos .blend originales
+│   ├── Textures/               <- Texturas (PNG, TGA, JPG)
+│   ├── Materials/              <- Materiales creados
+│   ├── Shaders/                <- Shaders personalizados
+│   └── Prefabs/                <- Prefabs exportados desde Blender
+│       ├── Modular/
+│       │   ├── Buildings/
+│       │   ├── Bridges/
+│       │   ├── Columns/
+│       │   └── Props/
+│       └── Environment/        <- Prefabs de escenarios, árboles, calles, etc.
+│
+├── Scenes/
+│   ├── Dev/                    <- Escenas de prueba o prototipos
+│   ├── Level1/
+│   └── Level2/
+│
+├── Scripts/
+│   ├── Editor/                 <- Scripts de Editor, EditorWindows, custom inspectors
+│   │   └── NodeSystem/
+│   │       ├── Node.cs
+│   │       └── NodeEditorWindow.cs
+│   ├── Gameplay/               <- Scripts de gameplay en ejecución
+│   │   ├── Player/
+│   │   └── NPC/
+│   └── Utilities/              <- Helpers, extensiones, herramientas
+│
+├── Resources/                  <- Para prefabs y assets que se cargan dinámicamente
+│   └── Prefabs/
+│       ├── WallPrefab.prefab
+│       └── ColumnPrefab.prefab
+│
+├── UI/
+│   ├── Sprites/
+│   ├── Fonts/
+│   └── CanvasPrefabs/
+│
+├── Audio/
+│   ├── Music/
+│   └── SFX/
+│
+├── Animations/
+│   ├── Characters/
+│   └── Props/
+│
+└── Plugins/                    <- Librerías externas

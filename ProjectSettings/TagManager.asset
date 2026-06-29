@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 3
+  tags:
+  - Conteiner
+  - Vault
+  - Wallrun
+  - Climb
+  - Manager
+  - Level
+  - Plataforma
+  - CrosshairStasisDetector
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - Main Post Process Volume
+  - Ground
+  - 
+  - Player
+  - Skybox3D
+  - 
+  - Physics Objects
+  - Triggers
+  - Wall
+  - Invisible
+  - No Collision
+  - Parts Player
+  - Decals
+  - StasisProxy
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  m_RenderingLayers:
+  - Default
+  - Player
+  - Decals
+  - Light Layer 3
+  - Light Layer 4
+  - Light Layer 5
+  - Light Layer 6
+  - Light Layer 7

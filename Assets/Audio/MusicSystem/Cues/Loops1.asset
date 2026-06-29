@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a37704cd5bbb57c4796ca361a56f0c44, type: 3}
+  m_Name: Loops1
+  m_EditorClassIdentifier: 
+  bpm: 170
+  beatsPerBar: 4
+  barsPerLoop: 8
+  outputMixer: {fileID: -2943420269060294739, guid: 1f041e422113c5442a038e9bf47c1459,
+    type: 2}
+  layers:
+  - id: 
+    clip: {fileID: 8300000, guid: c915b905249f19c4485f6148de1b28da, type: 3}
+    defaultVolume: 0.2
+    enabledByDefault: 1
+    loop: 1
+    isOptional: 0
+    groupTag: 
+  stingers: []
