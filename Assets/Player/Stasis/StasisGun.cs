@@ -397,6 +397,7 @@ namespace Player.Stasis
 
         private void ApplyStasisEffect(GameObject newObject, IStasis newStasisComponent)
         {
+            Debug.Log("Entrando a ApplyStasisEffect");
             // MISMA lógica de tu StasisGun2 (toggle por GameObject)
             int idx = _stasisList.FindIndex(x => x.obj == newObject);
             if (idx != -1)

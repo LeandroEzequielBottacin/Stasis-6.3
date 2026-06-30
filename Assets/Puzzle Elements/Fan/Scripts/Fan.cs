@@ -148,6 +148,7 @@ namespace Puzzle_Elements.Fan.Scripts
         public void StatisEffectActivate()
         {
             _isStasis = true;
+            Debug.Log("Stasis ventilador activado");
             StopFan();
             StasisEffect.StasisEffectStart();
         }
