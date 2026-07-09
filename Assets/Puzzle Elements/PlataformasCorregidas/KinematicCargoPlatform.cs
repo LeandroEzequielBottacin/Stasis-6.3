@@ -37,6 +37,7 @@ namespace Puzzle_Elements.PlataformasCorregidas
 
         Rigidbody _rb;
         Phase _phase = Phase.Idle;
+        Phase _lastPhase = Phase.Idle;
 
         Vector3 _from;
         Vector3 _to;
@@ -49,26 +50,22 @@ namespace Puzzle_Elements.PlataformasCorregidas
 
         bool _headingUp;
 
-        Phase _lastPhase;
-
         [SerializeField]
         private ElevatorShipmentTrain _elevatorShipmentTrain;
 
         bool delayFinished;
         float delayRemaining = 1.5f;
         bool waitingDelay;
+        Coroutine delayCoroutine;
 
         void Awake()
         {
             _rb = GetComponent<Rigidbody>();
-
             _rb.isKinematic = true;
 
-            _elevatorShipmentTrain =
-                GetComponentInParent<ElevatorShipmentTrain>();
+            _elevatorShipmentTrain = GetComponentInParent<ElevatorShipmentTrain>();
 
             _lastPosition = _rb.position;
-
             platformVelocity = Vector3.zero;
         }
 
@@ -76,19 +73,12 @@ namespace Puzzle_Elements.PlataformasCorregidas
         {
             if (!pointA || !pointB)
             {
-                Debug.LogError(
-                    "[PlatformMoverTrapezoid] Asigna pointA/pointB.");
-
+                Debug.LogError("[KinematicCargoPlatform] Asigna pointA y pointB.");
                 enabled = false;
-
                 return;
             }
 
-            _rb.position =
-                startAtA
-                    ? pointA.position
-                    : pointB.position;
-
+            _rb.position = startAtA ? pointA.position : pointB.position;
             _lastPosition = _rb.position;
 
             _headingUp = startAtA;
@@ -101,71 +91,50 @@ namespace Puzzle_Elements.PlataformasCorregidas
 
         void PrepareSegment()
         {
-            _from =
-                _headingUp
-                    ? pointA.position
-                    : pointB.position;
+            _from = _headingUp ? pointA.position : pointB.position;
+            _to = _headingUp ? pointB.position : pointA.position;
 
-            _to =
-                _headingUp
-                    ? pointB.position
-                    : pointA.position;
+            Vector3 dir = _to - _from;
 
-            _dirN =
-                (_to - _from).normalized;
-
-            _distanceTotal =
-                Vector3.Distance(_from, _to);
+            _distanceTotal = dir.magnitude;
+            _dirN = _distanceTotal > 0.0001f ? dir.normalized : Vector3.zero;
 
             _travelled = 0f;
-
             _velocity = 0f;
         }
 
-        // ==========================================
-        // DELAY STASEABLE REAL
-        // ==========================================
-
         public void StartMove()
         {
+            if (delayCoroutine != null)
+                StopCoroutine(delayCoroutine);
+
             delayRemaining = 1.5f;
-
             delayFinished = false;
-
             waitingDelay = true;
 
-            StartCoroutine(DelayRoutine());
+            delayCoroutine = StartCoroutine(DelayRoutine());
         }
 
         IEnumerator DelayRoutine()
         {
             while (delayRemaining > 0f)
             {
-                if (_elevatorShipmentTrain != null &&
-                    _elevatorShipmentTrain.IsFreezed)
+                if (_elevatorShipmentTrain != null && _elevatorShipmentTrain.IsFreezed)
                 {
                     yield return null;
-
                     continue;
                 }
 
                 delayRemaining -= Time.deltaTime;
-
                 yield return null;
             }
 
             delayFinished = true;
-
             waitingDelay = false;
 
-            if (_elevatorShipmentTrain == null ||
-                !_elevatorShipmentTrain.IsFreezed)
-            {
+            if (_elevatorShipmentTrain == null || !_elevatorShipmentTrain.IsFreezed)
                 _phase = Phase.Accel;
-            }
         }
-
-        // ==========================================
 
         public void StopMove()
         {
@@ -174,23 +143,18 @@ namespace Puzzle_Elements.PlataformasCorregidas
 
         public void Desestasear()
         {
-            if (waitingDelay && delayFinished)
-            {
-                _phase = Phase.Accel;
-            }
-            else
-            {
-                _phase = _lastPhase;
-            }
+            if (waitingDelay)
+                return;
+
+            if (delayFinished)
+                _phase = _lastPhase == Phase.Idle ? Phase.Accel : _lastPhase;
         }
 
         public void stasear()
         {
-            if (_elevatorShipmentTrain == null ||
-                _elevatorShipmentTrain.IsFreezed)
+            if (_elevatorShipmentTrain == null || _elevatorShipmentTrain.IsFreezed)
             {
                 _lastPhase = _phase;
-
                 _phase = Phase.Idle;
             }
         }
@@ -207,244 +171,196 @@ namespace Puzzle_Elements.PlataformasCorregidas
 
         private void OnTriggerStay(Collider other)
         {
-            Model model =
-                other.GetComponent<Model>();
+            Model model = other.GetComponent<Model>();
 
             if (model != null)
             {
                 player = model;
-
                 player.blockUseGravity = true;
             }
         }
 
         private void OnTriggerExit(Collider other)
         {
-            Model model =
-                other.GetComponent<Model>();
+            Model model = other.GetComponent<Model>();
 
             if (model != null)
             {
                 model.blockUseGravity = false;
-
                 model.rb.useGravity = true;
-
                 player = null;
             }
         }
 
-        // ==========================================
-
         void FixedUpdate()
         {
-            if (waitingDelay)
+            float dt = Time.fixedDeltaTime;
+
+            if (waitingDelay || _phase == Phase.Idle)
+            {
+                _lastPosition = _rb.position;
+                platformVelocity = Vector3.zero;
                 return;
-
-            if (_phase == Phase.Idle)
-                return;
-
-            float dt =
-                Time.fixedDeltaTime;
-
-            float dAccel =
-                (cruiseSpeed * cruiseSpeed) /
-                (2f * Mathf.Max(acceleration, 1e-4f));
-
-            float dDecel =
-                dAccel;
-
-            float dMin =
-                dAccel + dDecel;
-
-            bool triangular =
-                _distanceTotal <= dMin;
-
-            float vTarget =
-                triangular
-                    ? Mathf.Sqrt(acceleration * _distanceTotal)
-                    : cruiseSpeed;
+            }
 
             switch (_phase)
             {
                 case Phase.Accel:
-                    {
-                        _velocity =
-                            Mathf.MoveTowards(
-                                _velocity,
-                                vTarget,
-                                acceleration * dt);
-
-                        Step(_velocity * dt);
-
-                        if (Reached())
-                        {
-                            Arrive();
-                            break;
-                        }
-
-                        if (triangular &&
-                            _travelled >= _distanceTotal * 0.5f)
-                        {
-                            _phase = Phase.Decel;
-                        }
-                        else if (!triangular &&
-                                 _travelled >= dAccel)
-                        {
-                            _phase = Phase.Cruise;
-                        }
-
-                        break;
-                    }
+                    UpdateAccel(dt);
+                    break;
 
                 case Phase.Cruise:
-                    {
-                        _velocity = vTarget;
-
-                        float remaining =
-                            _distanceTotal - _travelled;
-
-                        if (remaining <= dDecel)
-                        {
-                            _phase = Phase.Decel;
-                            break;
-                        }
-
-                        Step(_velocity * dt);
-
-                        if (Reached())
-                            Arrive();
-
-                        break;
-                    }
+                    UpdateCruise(dt);
+                    break;
 
                 case Phase.Decel:
-                    {
-                        float remaining =
-                            _distanceTotal - _travelled;
+                    UpdateDecel(dt);
+                    break;
 
-                        if (remaining <= arriveEpsilon)
-                        {
-                            Arrive();
-                            break;
-                        }
-
-                        float vStop =
-                            Mathf.Sqrt(
-                                Mathf.Max(
-                                    0f,
-                                    2f * acceleration * remaining));
-
-                        _velocity =
-                            Mathf.Min(_velocity, vStop);
-
-                        _velocity =
-                            Mathf.MoveTowards(
-                                _velocity,
-                                0f,
-                                acceleration * dt);
-
-                        Step(_velocity * dt);
-
-                        break;
-                    }
                 case Phase.Dwell:
-                    {
-                        _tDwell -= dt;
-
-                        if (_tDwell <= 0f)
-                        {
-                            if (mode == Mode.Once &&
-                                _headingUp)
-                            {
-                                _phase = Phase.Idle;
-                                break;
-                            }
-
-                            if (mode == Mode.Loop)
-                            {
-                                _headingUp = true;
-
-                                _rb.position =
-                                    pointA.position;
-                            }
-                            else
-                            {
-                                _headingUp = !_headingUp;
-                            }
-
-                            PrepareSegment();
-
-                            _phase = Phase.Accel;
-                        }
-
-                        break;
-                    }
+                    UpdateDwell(dt);
+                    break;
             }
 
-            // ==========================================
-            // MOVER PLAYER CON LA PLATAFORMA
-            // ==========================================
+            Vector3 delta = _rb.position - _lastPosition;
 
             if (player != null)
-            {
-                Vector3 delta =
-                    _rb.position - _lastPosition;
-
                 player.rb.position += delta;
+
+            Vector3 newPos = _rb.position;
+            platformVelocity = (newPos - _lastPosition) / Mathf.Max(dt, 0.0001f);
+            _lastPosition = newPos;
+        }
+
+        void UpdateAccel(float dt)
+        {
+            float dAccel = (cruiseSpeed * cruiseSpeed) / (2f * Mathf.Max(acceleration, 0.0001f));
+            float dDecel = dAccel;
+            bool triangular = _distanceTotal <= dAccel + dDecel;
+
+            float vTarget = triangular
+                ? Mathf.Sqrt(acceleration * _distanceTotal)
+                : cruiseSpeed;
+
+            _velocity = Mathf.MoveTowards(_velocity, vTarget, acceleration * dt);
+
+            Step(_velocity * dt);
+
+            if (Reached())
+            {
+                Arrive();
+                return;
             }
 
-            // ==========================================
-            // VELOCIDAD REAL
-            // ==========================================
+            if (triangular && _travelled >= _distanceTotal * 0.5f)
+                _phase = Phase.Decel;
+            else if (!triangular && _travelled >= dAccel)
+                _phase = Phase.Cruise;
+        }
 
-            Vector3 newPos =
-                _rb.position;
+        void UpdateCruise(float dt)
+        {
+            float dDecel = (cruiseSpeed * cruiseSpeed) / (2f * Mathf.Max(acceleration, 0.0001f));
+            float remaining = _distanceTotal - _travelled;
 
-            platformVelocity =
-                (newPos - _lastPosition) /
-                Mathf.Max(dt, 0.0001f);
+            if (remaining <= dDecel)
+            {
+                _phase = Phase.Decel;
+                return;
+            }
 
-            _lastPosition = newPos;
+            _velocity = cruiseSpeed;
+            Step(_velocity * dt);
+
+            if (Reached())
+                Arrive();
+        }
+
+        void UpdateDecel(float dt)
+        {
+            float remaining = _distanceTotal - _travelled;
+
+            if (remaining <= arriveEpsilon)
+            {
+                Arrive();
+                return;
+            }
+
+            float vStop = Mathf.Sqrt(Mathf.Max(0f, 2f * acceleration * remaining));
+
+            _velocity = Mathf.Min(_velocity, vStop);
+            _velocity = Mathf.MoveTowards(_velocity, 0f, acceleration * dt);
+
+            float step = Mathf.Max(_velocity * dt, arriveEpsilon);
+
+            Step(step);
+
+            if (Reached())
+                Arrive();
+        }
+
+        void UpdateDwell(float dt)
+        {
+            _tDwell -= dt;
+
+            if (_tDwell > 0f)
+                return;
+
+            if (mode == Mode.Once)
+            {
+                _phase = Phase.Idle;
+                return;
+            }
+
+            if (mode == Mode.Loop)
+            {
+                _headingUp = true;
+                _rb.position = pointA.position;
+                _lastPosition = _rb.position;
+            }
+            else if (mode == Mode.PingPong)
+            {
+                _headingUp = !_headingUp;
+            }
+
+            PrepareSegment();
+            _phase = Phase.Accel;
         }
 
         void Step(float step)
         {
-            float remaining =
-                _distanceTotal - _travelled;
+            if (_distanceTotal <= 0.0001f)
+            {
+                Arrive();
+                return;
+            }
 
-            step =
-                Mathf.Min(step, remaining);
+            float remaining = _distanceTotal - _travelled;
+            step = Mathf.Min(step, remaining);
 
-            _rb.MovePosition(
-                _rb.position + _dirN * step);
+            Vector3 nextPosition = _rb.position + _dirN * step;
+
+            _rb.MovePosition(nextPosition);
 
             _travelled += step;
         }
 
         bool Reached()
         {
-            return
-                (_distanceTotal - _travelled)
-                <= arriveEpsilon;
+            return (_distanceTotal - _travelled) <= arriveEpsilon;
         }
 
         void Arrive()
         {
-            // NO MovePosition acá
-
             _rb.position = _to;
 
-            _lastPosition = _to;
-
-            platformVelocity = Vector3.zero;
-
             _travelled = _distanceTotal;
+            _velocity = 0f;
 
             _phase = Phase.Dwell;
-
             _tDwell = dwellTime;
 
-            _velocity = 0f;
+            platformVelocity = Vector3.zero;
 
             if (_headingUp)
                 onReachB?.Invoke();
