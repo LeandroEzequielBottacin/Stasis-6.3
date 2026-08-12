@@ -24,7 +24,7 @@ TagManager:
   - 
   - Player
   - Skybox3D
-  - 
+  - Props
   - Physics Objects
   - Triggers
   - Wall
@@ -33,7 +33,7 @@ TagManager:
   - Parts Player
   - Decals
   - StasisProxy
-  - 
+  - Environment
   - 
   - 
   - 
