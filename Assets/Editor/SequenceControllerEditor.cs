@@ -173,7 +173,13 @@ public class SequenceControllerEditor : UnityEditor.Editor
                 new SequenceController.GrabAction()
             )
         );
-
+        menu.AddItem(
+             new GUIContent("Release"),
+            false,
+            () => AddAction(
+             new SequenceController.ReleaseAction()
+             )
+        );
         menu.AddItem(
             new GUIContent("Move"),
             false,
@@ -181,7 +187,13 @@ public class SequenceControllerEditor : UnityEditor.Editor
                 new SequenceController.MoveAction()
             )
         );
-
+        menu.AddItem(
+         new GUIContent("Parabolic Move"),
+         false,
+         () => AddAction(
+        new SequenceController.ParabolicMoveAction()
+        )
+        );
         menu.AddItem(
             new GUIContent("Look At"),
             false,

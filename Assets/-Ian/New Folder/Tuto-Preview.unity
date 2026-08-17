@@ -9719,6 +9719,7 @@ MonoBehaviour:
       type: {class: SequenceController/MoveAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         target: {fileID: 7433328931394162109}
         destination: {fileID: 5662664167138558054}
         offset: {x: 0, y: 0, z: 0}
@@ -9752,11 +9753,13 @@ MonoBehaviour:
       type: {class: SequenceController/WaitAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         seconds: 3
     - rid: 7124767516342878299
       type: {class: SequenceController/GrabAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         objectToGrab: {fileID: 7115859268887456730}
         grabPoint: {fileID: 3052194438173059048}
         snapToGrabPoint: 1
@@ -9765,6 +9768,7 @@ MonoBehaviour:
       type: {class: SequenceController/MoveAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         target: {fileID: 3087310143042032715}
         destination: {fileID: 7115859268887456730}
         offset: {x: 0, y: 4, z: 0}
@@ -9798,11 +9802,13 @@ MonoBehaviour:
       type: {class: SequenceController/WaitAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         seconds: 1
     - rid: 7124767516342878303
       type: {class: SequenceController/MoveAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         target: {fileID: 3087310143042032715}
         destination: {fileID: 1787603036577874513}
         offset: {x: 0, y: 0, z: 0}
@@ -9836,6 +9842,7 @@ MonoBehaviour:
       type: {class: SequenceController/MoveAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         target: {fileID: 1795808899864630941}
         destination: {fileID: 3251225968739178001}
         offset: {x: 0, y: 0, z: 0}
@@ -9869,6 +9876,7 @@ MonoBehaviour:
       type: {class: SequenceController/WaitAction, ns: , asm: Assembly-CSharp}
       data:
         name: 
+        nextActionTime: 1
         seconds: 2
 --- !u!23 &488676629164055603
 MeshRenderer:
@@ -10744,6 +10752,74 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isFreezed: 0
   _stasisTipController: {fileID: 1880207728247162776}
+--- !u!1001 &1047481729105017557
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 15.57566
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 129.96495
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5987871050382076634, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6012521683660659961, guid: bcdfebd94e1dda74c9dc786e57c79416,
+        type: 3}
+      propertyPath: m_Name
+      value: Prueba
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: bcdfebd94e1dda74c9dc786e57c79416, type: 3}
 --- !u!4 &1048861482899898376
 Transform:
   m_ObjectHideFlags: 0
@@ -17334,6 +17410,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3251225968739178001}
+  - component: {fileID: 3841822453712887702}
   m_Layer: 0
   m_Name: Point (2)
   m_TagString: Untagged
@@ -17341,6 +17418,19 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &3841822453712887702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3841822453712887701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 810809c96c2ece848931c20b0930312c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectDirection
+  lineLength: 1
 --- !u!23 &3845420827208516198
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -29145,3 +29235,4 @@ SceneRoots:
   - {fileID: 927768541}
   - {fileID: 1206887007}
   - {fileID: 5315863097680470409}
+  - {fileID: 1047481729105017557}
