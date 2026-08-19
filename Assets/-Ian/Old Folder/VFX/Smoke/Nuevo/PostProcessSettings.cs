@@ -27,6 +27,26 @@ public class PostProcessSettings
     [Range(0f, 1f)]
     public float maxWeight = 1f;
 
+
+
+    [NonSerialized]
+    private float _initialVolumeWeight;
+
+    [NonSerialized]
+    private float _initialVignetteIntensity;
+
+    [NonSerialized]
+    private Color _initialVignetteColor;
+
+    [NonSerialized]
+    private float _initialTemperature;
+
+    [NonSerialized]
+    private float _initialSaturation;
+
+    [NonSerialized]
+    private float _initialChromatic;
+
     // =====================================================
     // VIGNETTE
     // =====================================================
@@ -122,7 +142,28 @@ public class PostProcessSettings
         _profile.TryGet(out _colorAdjustments);
         _profile.TryGet(out _chromatic);
 
-        volume.weight = 0f;
+        _initialVolumeWeight = volume.weight;
+
+        if (_vignette != null)
+        {
+            _initialVignetteIntensity = _vignette.intensity.value;
+            _initialVignetteColor = _vignette.color.value;
+        }
+
+        if (_whiteBalance != null)
+        {
+            _initialTemperature = _whiteBalance.temperature.value;
+        }
+
+        if (_colorAdjustments != null)
+        {
+            _initialSaturation = _colorAdjustments.saturation.value;
+        }
+
+        if (_chromatic != null)
+        {
+            _initialChromatic = _chromatic.intensity.value;
+        }
     }
 
     public void ApplyDanger(float danger)
@@ -199,11 +240,34 @@ public class PostProcessSettings
     {
         dangerValue = 0f;
         effectPower = 0f;
-        currentWeight = 0f;
-        currentVignette = 0f;
+        currentWeight = _initialVolumeWeight;
+        currentVignette = _initialVignetteIntensity;
 
         if (volume != null)
-            volume.weight = 0f;
+        {
+            volume.weight = _initialVolumeWeight;
+        }
+
+        if (_vignette != null)
+        {
+            _vignette.intensity.value = _initialVignetteIntensity;
+            _vignette.color.value = _initialVignetteColor;
+        }
+
+        if (_whiteBalance != null)
+        {
+            _whiteBalance.temperature.value = _initialTemperature;
+        }
+
+        if (_colorAdjustments != null)
+        {
+            _colorAdjustments.saturation.value = _initialSaturation;
+        }
+
+        if (_chromatic != null)
+        {
+            _chromatic.intensity.value = _initialChromatic;
+        }
     }
 }
     
