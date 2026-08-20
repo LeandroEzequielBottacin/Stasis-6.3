@@ -525,6 +525,7 @@ namespace Puzzle_Elements.IK.Scripts
             }
 
             rb.MovePosition(p);
+
             rb.MoveRotation(r);
         }
 
@@ -536,5 +537,6 @@ namespace Puzzle_Elements.IK.Scripts
                 moveRoutine = null;
             }
         }
+
     }
 }
