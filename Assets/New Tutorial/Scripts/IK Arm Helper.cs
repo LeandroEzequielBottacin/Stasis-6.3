@@ -12,14 +12,15 @@ public class IKArmHelper : MonoBehaviour
     [SerializeField] private int _reactionDistance = 20;
     [SerializeField] private int _reactionDistanceInverse = 150;
 
+    [Tooltip("Curve applied after remap (x: 0..1 input, y: 0..1 output).")]
+    public AnimationCurve remapLerp = AnimationCurve.Linear(0, 0, 1, 1);
+
     [SerializeField] private bool isInverse;
 
-    private ChainIKConstraint _tip;
-    private GameObject _childrenTip;
-    private Renderer _childrenTipRenderer;
 
     [SerializeField] private Color _colorMaterial;
     [SerializeField] private Color _colorInverseMaterial;
+    [SerializeField] private GameObject _platform;
 
 
     // =========================
@@ -47,10 +48,6 @@ public class IKArmHelper : MonoBehaviour
 
     private void Start()
     {
-        _tip = GetComponentInChildren<ChainIKConstraint>();
-
-        _childrenTip = _tip.data.tip.gameObject;
-        _childrenTipRenderer = _childrenTip.GetComponent<Renderer>();
 
         ApplySettings();
     }
@@ -65,12 +62,13 @@ public class IKArmHelper : MonoBehaviour
         _followTargetController.outMin = OutMin;
         _followTargetController.outMax = OutMax;
 
-        if (_childrenTipRenderer != null)
+        if (_platform != null)
         {
-            _childrenTipRenderer.material.color =
+            _platform.GetComponent<Renderer>().material.color =
                 isInverse
                     ? _colorInverseMaterial
                     : _colorMaterial;
         }
+        _followTargetController.remapLerp = remapLerp;
     }
 }
