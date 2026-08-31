@@ -181,7 +181,7 @@ GameObject:
   - component: {fileID: 3098476075641903759}
   - component: {fileID: 7134637688723464884}
   - component: {fileID: 1742769839172752519}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Arm
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -266,7 +266,7 @@ GameObject:
   - component: {fileID: 8261381529183205625}
   - component: {fileID: 2616468380468818620}
   - component: {fileID: 6850257026661997715}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Rig
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -303,7 +303,7 @@ MonoBehaviour:
   m_Weight: 1
   m_Data:
     m_Root: {fileID: 3893275894370222110}
-    m_Tip: {fileID: 8921163215993138990}
+    m_Tip: {fileID: 1063690543329392741}
     m_Target: {fileID: 3738386789740745553}
     m_ChainRotationWeight: 1
     m_TipRotationWeight: 1
@@ -335,7 +335,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3505151758117518891}
   - component: {fileID: 919712838101886705}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: IK Arm Green 4 bones
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -375,16 +375,16 @@ MonoBehaviour:
   _followTargetController: {fileID: 2365415564155069372}
   _target: {fileID: 3738386789740745553}
   _targetBrother: {fileID: 3817391568531399452}
-  _reactionDistance: 30
-  _reactionDistanceInverse: 200
+  _reactionDistance: 40
+  _reactionDistanceInverse: 40
   remapLerp:
     serializedVersion: 2
     m_Curve:
     - serializedVersion: 3
       time: 0
       value: 0
-      inSlope: 0
-      outSlope: 1
+      inSlope: 2
+      outSlope: 2
       tangentMode: 0
       weightedMode: 0
       inWeight: 0
@@ -392,7 +392,7 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 1
       value: 1
-      inSlope: 1
+      inSlope: 0
       outSlope: 0
       tangentMode: 0
       weightedMode: 0
@@ -401,7 +401,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  isInverse: 0
+  isInverse: 1
   _colorMaterial: {r: 0.21331067, g: 1, b: 0.023584902, a: 1}
   _colorInverseMaterial: {r: 1, g: 0, b: 0, a: 1}
   _platform: {fileID: 5324319550694281249}
@@ -418,7 +418,7 @@ GameObject:
   - component: {fileID: 2365415564155069372}
   - component: {fileID: 7466985879908978520}
   - component: {fileID: 3430666675724210726}
-  m_Layer: 11
+  m_Layer: 15
   m_Name: Target
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -433,14 +433,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7987587916725789910}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 5.15, y: 10.51, z: 5.24}
+  m_LocalRotation: {x: 0.2705972, y: 0.27059826, z: 0.6532808, w: 0.6532825}
+  m_LocalPosition: {x: -2.8, y: 14.24, z: -2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3018759496688429886}
   m_Father: {fileID: 3505151758117518891}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 90}
 --- !u!54 &6457641000350104503
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -584,38 +584,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dcee16d853d5d8d409cc0640b7ed362c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Tools.ForceSelectParentTag
---- !u!1 &8347798115301064840
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 8921163215993138990}
-  m_Layer: 11
-  m_Name: Tip
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &8921163215993138990
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8347798115301064840}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: 0.6449723, w: 0.764206}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1063690543329392741}
-  m_Father: {fileID: 7186076325080535173}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 80.327}
 --- !u!1001 &89347283088866551
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -642,42 +610,57 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9691526
+      value: 0.6137083
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: -0.6792699
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0.40150073
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.24646144
+      value: 0.02741514
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: -58.844
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 118.293
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -28.536
+      value: -81.589
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -695,6 +678,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7143879225813667126}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8309219664132423505}
   m_SourcePrefab: {fileID: 100100000, guid: 3e973680349d2a44c96712a8d86dcae2, type: 3}
 --- !u!4 &484090351235439388 stripped
 Transform:
@@ -743,6 +730,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &8309219664132423505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1007686122658415014}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 6100769038911346089}
+  targetRenderers:
+  - {fileID: 1656472819401941107}
 --- !u!23 &1656472819401941107 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
@@ -817,6 +820,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mod_MechaPlatform
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      propertyPath: m_Layer
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -834,7 +842,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 8921163215993138990}
+    m_TransformParent: {fileID: 7186076325080535173}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
@@ -854,22 +862,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.764206
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0.00000004054973
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: 0.000000024003413
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: 0.6449723
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
@@ -886,10 +894,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -903,6 +926,14 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 8966007003941371753}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1054755610938097425}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7175005865399283558}
   m_SourcePrefab: {fileID: 100100000, guid: 3e973680349d2a44c96712a8d86dcae2, type: 3}
 --- !u!1 &398898717948076767 stripped
 GameObject:
@@ -924,6 +955,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &1054755610938097425
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398898717948076767}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 7175005865399283558}
+  targetRenderers:
+  - {fileID: 2200518820979327754}
+--- !u!135 &7175005865399283558
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 398898717948076767}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.47446844
+  m_Center: {x: 0, y: 0.00000333786, z: 0}
 --- !u!4 &1063690543329392741 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
@@ -962,42 +1030,57 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9650458
+      value: 0.9284145
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.2780196
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0.21841274
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.26208147
+      value: 0.114225544
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 27.797
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 32.023
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -30.387
+      value: 22.151
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1015,6 +1098,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6201068218187488046}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2570497509693419848}
   m_SourcePrefab: {fileID: 100100000, guid: 3e973680349d2a44c96712a8d86dcae2, type: 3}
 --- !u!23 &442171972530089695 stripped
 MeshRenderer:
@@ -1069,6 +1156,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &2570497509693419848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2099263881840267018}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 4944175193223677402}
+  targetRenderers:
+  - {fileID: 442171972530089695}
 --- !u!1001 &1476169764804726039
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1136,6 +1239,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaPlatform
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1206,6 +1314,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Name
@@ -1214,7 +1332,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Layer
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1232,6 +1350,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1646072120655218870}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6167269400875423328}
   m_SourcePrefab: {fileID: 100100000, guid: 75e22159d3b98994eac16f7887828df9, type: 3}
 --- !u!1 &2834269459038646915 stripped
 GameObject:
@@ -1274,6 +1396,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &6167269400875423328
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2834269459038646915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 4856238509038613268}
+  targetRenderers:
+  - {fileID: 4347562977374966614}
 --- !u!4 &3179129719959119929 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 75e22159d3b98994eac16f7887828df9,
@@ -1354,6 +1492,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Mod_MechaJoint (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 15
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -1427,10 +1570,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
         type: 3}
       propertyPath: m_Name
       value: Mod_BaseMechaPlatform
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1554,10 +1712,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1575,6 +1748,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3615120923979215254}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2128857307027817925}
   m_SourcePrefab: {fileID: 100100000, guid: 3e973680349d2a44c96712a8d86dcae2, type: 3}
 --- !u!23 &2759753367014652785 stripped
 MeshRenderer:
@@ -1629,6 +1806,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &2128857307027817925
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4417012403552066212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 6534623106319777059}
+  targetRenderers:
+  - {fileID: 2759753367014652785}
 --- !u!1001 &4559886293014148085
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1696,6 +1889,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1770,6 +1968,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Name
@@ -1778,7 +1986,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Layer
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1796,6 +2004,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2384135718180895321}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1796006163959816995}
   m_SourcePrefab: {fileID: 100100000, guid: 75e22159d3b98994eac16f7887828df9, type: 3}
 --- !u!4 &5172450260680376888 stripped
 Transform:
@@ -1844,6 +2056,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &1796006163959816995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5513510643523344514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 4041221804968034695}
+  targetRenderers:
+  - {fileID: 6305902353793218903}
 --- !u!23 &6305902353793218903 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
@@ -1908,6 +2136,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Name
@@ -1916,7 +2154,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Layer
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1934,6 +2172,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1260429397727886500}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 30551490934670590}
   m_SourcePrefab: {fileID: 100100000, guid: 75e22159d3b98994eac16f7887828df9, type: 3}
 --- !u!4 &4999800285141813307 stripped
 Transform:
@@ -1982,6 +2224,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &30551490934670590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5632045393751970433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 5074411230429656572}
+  targetRenderers:
+  - {fileID: 6136707555966694228}
 --- !u!23 &6136707555966694228 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
@@ -2046,10 +2304,25 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaPlatform
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2059,6 +2332,14 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 7410223256538267695}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5419664807493206573}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8240421026449856177}
   m_SourcePrefab: {fileID: 100100000, guid: c66bcde8137db5849a2d5e8da6fbd43a, type: 3}
 --- !u!4 &4803116218112051867 stripped
 Transform:
@@ -2086,6 +2367,43 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &5419664807493206573
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5324319550694281249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 8240421026449856177}
+  targetRenderers:
+  - {fileID: 5972674826616402420}
+--- !u!65 &8240421026449856177
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5324319550694281249}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 8.723003, y: 0.40792874, z: 8.723}
+  m_Center: {x: 0.0000008161866, y: 1.2260438, z: -0.0000005099476}
 --- !u!23 &5972674826616402420 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: c66bcde8137db5849a2d5e8da6fbd43a,
@@ -2118,42 +2436,57 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.97999495
+      value: 0.98998
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.09044935
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: 0.018368987
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.1990228
+      value: -0.10687054
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
+      value: 10.545
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: 0.993
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: -22.96
+      value: -12.231
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
       propertyPath: m_Name
       value: Mod_MechaJoint (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_Layer
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2171,6 +2504,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 4273753293318507702}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7903921550488626139}
   m_SourcePrefab: {fileID: 100100000, guid: 3e973680349d2a44c96712a8d86dcae2, type: 3}
 --- !u!23 &5068442200090026046 stripped
 MeshRenderer:
@@ -2225,6 +2562,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &7903921550488626139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6725639114216473067}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 3642551634474474679}
+  targetRenderers:
+  - {fileID: 5068442200090026046}
 --- !u!1001 &7219458379754272622
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2283,6 +2636,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: 'm_Materials.Array.data[1]'
+      value: 
+      objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Name
@@ -2291,7 +2654,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       propertyPath: m_Layer
-      value: 11
+      value: 14
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2299,7 +2662,7 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8921163215993138990}
+      addedObject: {fileID: 1063690543329392741}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
@@ -2309,6 +2672,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 862147811850241756}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5218582261891865681}
   m_SourcePrefab: {fileID: 100100000, guid: 75e22159d3b98994eac16f7887828df9, type: 3}
 --- !u!4 &7186076325080535173 stripped
 Transform:
@@ -2357,6 +2724,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Puzzle_Elements.IK.Scripts.StasisPartArmIK
   _isFreezed: 0
   _stasisTipController: {fileID: 7466985879908978520}
+--- !u!114 &5218582261891865681
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7562039604840581695}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f002210bef5b35849bb145809f3e050b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::StasisElectricVisual
+  connectionMode: 0
+  surfaceCollider: {fileID: 2599790524242421596}
+  targetRenderers:
+  - {fileID: 8354527523381111786}
 --- !u!23 &8354527523381111786 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,

@@ -26,6 +26,11 @@ namespace Player.Stasis
         [SerializeField] private GameObject stasisBeamPrefab;
         [SerializeField] private GameObject particleStasisMissed;
 
+        [SerializeField] private ProceduralLightning _electricBeam;
+
+
+
+
         [Header("Raycast (real desde cámara)")]
         [SerializeField, Tooltip("Radio del SphereCast para perdonar errores de puntería.")]
         private float radiusStasis = 0.2f;
@@ -356,23 +361,40 @@ namespace Player.Stasis
             // Si tenías un solo beam persistente, limpiamos el anterior
             if (_activeBeam) Destroy(_activeBeam.gameObject);
 
+            //switch (mode)
+            //{
+            //    case FireMode.Right:
+            //        SpawnOneBeam((right ? right.position : left.position), hitPoint, stasisHit);
+            //        break;
+            //    case FireMode.Left:
+            //        SpawnOneBeam((left ? left.position : right.position), hitPoint, stasisHit);
+            //        break;
+            //    case FireMode.Alternate:
+            //        // Guardado por si alguna vez querés disparar ambos simultáneo
+            //        SpawnOneBeam((right ? right.position : left.position), hitPoint, stasisHit);
+            //        SpawnOneBeam((left ? left.position : right.position),  hitPoint, stasisHit);
+            //        break;
+            //}
             switch (mode)
             {
                 case FireMode.Right:
-                    SpawnOneBeam((right ? right.position : left.position), hitPoint, stasisHit);
+                    PlayElectricStasis((right? right.position: left.position),hitPoint);
                     break;
                 case FireMode.Left:
-                    SpawnOneBeam((left ? left.position : right.position), hitPoint, stasisHit);
+                     PlayElectricStasis((left ? left.position : right.position), hitPoint);
                     break;
                 case FireMode.Alternate:
-                    // Guardado por si alguna vez querés disparar ambos simultáneo
-                    SpawnOneBeam((right ? right.position : left.position), hitPoint, stasisHit);
-                    SpawnOneBeam((left ? left.position : right.position),  hitPoint, stasisHit);
+                    PlayElectricStasis((right ? right.position : left.position), hitPoint);
+                    PlayElectricStasis((left ? left.position : right.position), hitPoint);
                     break;
             }
             
         }
 
+        private void PlayElectricStasis(Vector3 origin, Vector3 hitPoint)
+        {
+            _electricBeam.Play(origin, hitPoint);
+        }
         private void SpawnOneBeam(Vector3 origin, Vector3 hitPoint, bool stasisHit)
         {
             if (!stasisBeamPrefab) return;
