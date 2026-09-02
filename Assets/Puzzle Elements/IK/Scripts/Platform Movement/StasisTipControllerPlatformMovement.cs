@@ -103,15 +103,13 @@ namespace Puzzle_Elements.IK.Scripts.Platform_Movement
     
         public void SetOutlineThickness(float thickness)
         {
-            if (renderers == null || _mpb == null) return;
+            // The outline is drawn by StasisOutlineFeature off a rendering-layer bit now,
+            // not by a material on the renderer, so _BorderThickness no longer reaches
+            // anything. The thickness argument is kept as the on/off signal callers pass.
+            if (renderers == null) return;
 
             foreach (var rend in renderers)
-            {
-                if (!rend) continue;
-                rend.GetPropertyBlock(_mpb);
-                _mpb.SetFloat(_outlineThicknessName, thickness);
-                rend.SetPropertyBlock(_mpb);
-            }
+                Stasis.Rendering.StasisRenderingLayers.SetOutline(rend, thickness > 0f);
         }
 
         public void SetColorOutline(Color color, float alpha)

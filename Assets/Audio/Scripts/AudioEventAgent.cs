@@ -9,10 +9,6 @@ namespace Audio.Scripts
     [DisallowMultipleComponent]
     public class AudioEventAgent : MonoBehaviour
     {
-        [Header("Targets")]
-        [Tooltip("Componentes a escanear para detectar eventos/campos delegado sin parámetros.")]
-        [SerializeField] private List<MonoBehaviour> targetScripts = new();
-
         [Header("Mixer / Defaults")]
         [SerializeField] private AudioMixerGroup defaultMixerGroup;
 
@@ -30,7 +26,6 @@ namespace Audio.Scripts
         [SerializeField] private bool debugScan;
 
         // API para el Hub
-        public IList<MonoBehaviour> TargetScripts => targetScripts;
         public AudioMixerGroup DefaultMixerGroup => defaultMixerGroup;
         public AudioSource SourceTemplate => sourceTemplate;
         public Transform GlobalEmitterOverride => globalEmitterOverride;
@@ -39,13 +34,6 @@ namespace Audio.Scripts
         private void OnEnable()
         {
             AudioEventHub.Instance?.RegisterAgent(this);
-
-#if UNITY_EDITOR
-            if (!Application.isPlaying)
-            {
-                SyncEventConfigListWithReflectedMembers(EditorDetectedKeys());
-            }
-#endif
         }
 
         private void OnDisable()
@@ -53,90 +41,26 @@ namespace Audio.Scripts
             AudioEventHub.Instance?.UnregisterAgent(this);
         }
 
-        public EventConfig FindConfigByKey(string eventKey)
+        public void AddEventConfig(EventConfig config)
         {
-            return events.FirstOrDefault(e => e.eventKey == eventKey);
-        }
-        
-        public void SyncEventConfigListWithReflectedMembers(IEnumerable<string> detectedKeys)
-        {
-            var detectedKeyList = detectedKeys
-                .Where(k => !string.IsNullOrEmpty(k))
-                .Distinct()
-                .ToList();
-
-            var remainingExisting = new List<EventConfig>(events);
-            var newEventList = new List<EventConfig>(detectedKeyList.Count);
-
-            foreach (var key in detectedKeyList)
-            {
-                var parts = key.Split(new[] { "::" }, StringSplitOptions.None);
-                var member = parts.Length > 1 ? parts[1] : key;
-
-                string display = member;
-                if (parts.Length > 1)
-                {
-                    var typeName = parts[0].Split('.').LastOrDefault() ?? parts[0];
-                    display = $"{typeName}.{member}";
-                }
-
-                EventConfig cfg = null;
-
-                if (!string.IsNullOrEmpty(key))
-                {
-                    cfg = remainingExisting.FirstOrDefault(c => c.eventKey == key);
-                }
-
-                if (cfg == null)
-                {
-                    cfg = remainingExisting.FirstOrDefault(c =>
-                        (!string.IsNullOrEmpty(c.eventName) && c.eventName == member) ||
-                        (!string.IsNullOrEmpty(c.displayName) && c.displayName == display));
-                }
-
-                if (cfg == null)
-                {
-                    cfg = new EventConfig();
-                }
-                else
-                {
-                    remainingExisting.Remove(cfg);
-                }
-
-                cfg.eventKey = key;
-                cfg.displayName = display;
-                cfg.eventName = member;
-
-                newEventList.Add(cfg);
-            }
-            
-            foreach (var leftover in remainingExisting)
-            {
-                leftover.enabled = false;
-                newEventList.Add(leftover);
-            }
-            events.Clear();
-            events.AddRange(newEventList);
+            events.Add(config);
         }
 
-#if UNITY_EDITOR
-        private IEnumerable<string> EditorDetectedKeys()
+        public EventConfig FindConfigByGuid(string guid)
         {
-            foreach (var (script, member) in AudioEventHub.EditorScanTargets(targetScripts))
-            {
-                yield return AudioEventHub.MakeKeyForEditor(script, member);
-            }
+            return events.FirstOrDefault(e => e.guid == guid);
         }
-#endif
 
         [Serializable]
         public class EventConfig
         {
             [HideInInspector] public string guid = Guid.NewGuid().ToString();
 
-            [HideInInspector] public string eventKey;
-            [HideInInspector] public string displayName;
+            [Tooltip("El script del que se leerá el evento")]
+            public MonoBehaviour targetScript;
+            [Tooltip("El nombre del evento al que nos suscribimos")]
             public string eventName;
+            [HideInInspector] public string displayName;
 
             [Tooltip("Habilitar/Deshabilitar este evento.")]
             public bool enabled = true;

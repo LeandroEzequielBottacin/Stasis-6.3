@@ -51,8 +51,17 @@ Shader "Hidden/Stasis/OutlineScreen"
         float _StasisFlickerStrength;
         float _StasisFlickerSpeed;
 
+        float _StasisGlitchStrength;
+        float _StasisGlitchBands;
+        float _StasisGlitchRate;
+        float _StasisGlitchDensity;
+        float _StasisGlitchShift;
+        float _StasisGlitchRGBSplit;
+        float _StasisGlitchTint;
+
         TEXTURE2D_X(_StasisMask);
         TEXTURE2D_X(_StasisDilated);
+        TEXTURE2D_X(_StasisSceneColor);
 
         // Grow the mask outwards into a distance field, in one pass over a disc.
         //
@@ -92,6 +101,53 @@ Shader "Hidden/Stasis/OutlineScreen"
             return float4(best.rgb, saturate(best.a));
         }
 
+
+        float StasisHash1(float n)
+        {
+            return frac(sin(n * 12.9898) * 43758.5453);
+        }
+
+        // Tears the frozen object into horizontal slices and slides them sideways, with a
+        // per-channel offset on top. Sampling a copy of the scene colour (rather than the
+        // live target) is what lets a slice pull pixels in from somewhere else, which is
+        // the part that reads as a glitch rather than as a blur.
+        //
+        // Returns premultiplied colour; alpha says how much of the original pixel to replace.
+        float4 StasisGlitch(float2 uv, float inside, float time, float3 stasisColor)
+        {
+            if (_StasisGlitchStrength <= 0.0 || inside <= 0.0) return 0;
+
+            // Slices only change on discrete ticks; a continuously moving offset looks
+            // like wobble, not like corrupted data.
+            float tick = floor(time * max(_StasisGlitchRate, 0.001));
+            float band = floor(uv.y * max(_StasisGlitchBands, 1.0));
+
+            float pick = StasisHash1(band * 1.7 + tick * 3.1);
+            float active = step(1.0 - saturate(_StasisGlitchDensity), pick);
+
+            float shift = (StasisHash1(band + tick * 7.3) - 0.5) * 2.0 * _StasisGlitchShift * active;
+
+            float2 guv = uv + float2(shift, 0.0);
+            float split = _StasisGlitchRGBSplit * (0.35 + 0.65 * active);
+
+            float3 c;
+            c.r = SAMPLE_TEXTURE2D_X_LOD(_StasisSceneColor, sampler_LinearClamp, guv + float2(split, 0.0), 0).r;
+            c.g = SAMPLE_TEXTURE2D_X_LOD(_StasisSceneColor, sampler_LinearClamp, guv, 0).g;
+            c.b = SAMPLE_TEXTURE2D_X_LOD(_StasisSceneColor, sampler_LinearClamp, guv - float2(split, 0.0), 0).b;
+
+            // Blocky bright speckle, so the tear is not just a clean offset.
+            float2 blockUv = floor(uv * float2(_StasisGlitchBands * 1.7, _StasisGlitchBands));
+            float block = StasisHash1(blockUv.x * 3.7 + blockUv.y * 11.3 + tick * 5.1);
+            c += stasisColor * step(0.985, block) * active * 2.0;
+
+            c = lerp(c, c * stasisColor, saturate(_StasisGlitchTint));
+
+            // Only the displaced slices replace the pixel; the rest of the object stays
+            // as it was rendered.
+            float a = saturate(_StasisGlitchStrength) * inside * max(active, saturate(_StasisGlitchRGBSplit * 40.0));
+            return float4(c * a, a);
+        }
+
         float4 FragComposite(Varyings IN) : SV_Target
         {
             UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
@@ -99,7 +155,7 @@ Shader "Hidden/Stasis/OutlineScreen"
 
             float4 dilated = SAMPLE_TEXTURE2D_X_LOD(_StasisDilated, sampler_LinearClamp, uv, 0);
             float field = dilated.a;
-            if (field <= 0.0) return 0;
+            if (field <= 0.0) return 0;   // premultiplied: no colour, no coverage
 
             // Point-sample the original silhouette so the inner edge stays crisp.
             float inside = SAMPLE_TEXTURE2D_X_LOD(_StasisMask, sampler_PointClamp, uv, 0).a;
@@ -144,7 +200,12 @@ Shader "Hidden/Stasis/OutlineScreen"
                     * StasisFlicker(t, _StasisFlickerStrength, _StasisFlickerSpeed)
                     * _StasisIntensity;
 
-            return float4(_StasisColor.rgb * energy, 1.0);
+            float3 outline = _StasisColor.rgb * energy;
+
+            // Premultiplied alpha, so one pass can both add the glow (alpha 0) and
+            // replace the torn slices (alpha 1) without a second full-screen pass.
+            float4 glitch = StasisGlitch(uv, inside, t, _StasisColor.rgb);
+            return float4(outline + glitch.rgb, glitch.a);
         }
         ENDHLSL
 
@@ -162,11 +223,32 @@ Shader "Hidden/Stasis/OutlineScreen"
         Pass
         {
             Name "StasisComposite"
-            Blend One One   // additive, so the glow feeds bloom
+            // Premultiplied alpha: rgb is added, alpha says how much of the existing
+            // pixel to remove. Glow uses alpha 0 (pure add), glitch slices use alpha > 0.
+            Blend One OneMinusSrcAlpha
             HLSLPROGRAM
             #pragma vertex Vert
             #pragma fragment FragComposite
             #pragma target 3.5
+            ENDHLSL
+        }
+
+        Pass
+        {
+            Name "StasisCopyColor"
+            Blend Off
+            HLSLPROGRAM
+            #pragma vertex Vert
+            #pragma fragment FragCopy
+            #pragma target 3.5
+
+            // The glitch needs to read scene pixels from somewhere other than where it
+            // writes, so the composite samples this copy instead of its own target.
+            float4 FragCopy(Varyings IN) : SV_Target
+            {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
+                return SAMPLE_TEXTURE2D_X_LOD(_BlitTexture, sampler_LinearClamp, IN.texcoord, 0);
+            }
             ENDHLSL
         }
     }

@@ -319,7 +319,7 @@ namespace Player.Scripts.MovementFSM.MVC
         // ReSharper disable Unity.PerformanceAnalysis
         public void VaultEndEvent() => OnVaultEnd?.Invoke();
 
-        internal bool IsGroundedNow() => Scanner && Scanner.IsGrounded();
+        public bool IsGroundedNow() => Scanner && Scanner.IsGrounded();
 
         // ReSharper disable Unity.PerformanceAnalysis
         private void HandleFocusEnter() => OnInteractFocusEnter?.Invoke();

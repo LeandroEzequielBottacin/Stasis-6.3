@@ -62,37 +62,42 @@ namespace Audio.Scripts
             _eventsByKey[agent] = new Dictionary<string, (MonoBehaviour, EventInfo)>(StringComparer.Ordinal);
             _fieldsByKey[agent] = new Dictionary<string, (MonoBehaviour, FieldInfo)>(StringComparer.Ordinal);
 
-            foreach (var script in agent.TargetScripts.Where(s => s))
-                ScanDelegateMembers(agent, script);
-
-            agent.SyncEventConfigListWithReflectedMembers(GetAllKeysFor(agent));
-
             if (!Application.isPlaying) return;
 
-            foreach (var kv in _eventsByKey[agent])
+            foreach (var cfg in agent.EventConfigs)
             {
-                string key = kv.Key;
-                var (script, ei) = kv.Value;
-                var del = CreateZeroParamDelegateFor(ei.EventHandlerType, () => OnReflectedEvent(agent, key));
-                if (del != null)
-                {
-                    ei.AddEventHandler(script, del);
-                    _handlersByKey[key] = del;
-                }
-            }
+                if (cfg == null || !cfg.enabled || !cfg.targetScript || string.IsNullOrEmpty(cfg.eventName)) continue;
+                
+                var script = cfg.targetScript;
+                var type = script.GetType();
+                string key = cfg.guid;
 
-            foreach (var kv in _fieldsByKey[agent])
-            {
-                string key = kv.Key;
-                var (script, fi) = kv.Value;
-                var handlerType = fi.FieldType;
-                var current = (Delegate)fi.GetValue(script);
-                var addDel = CreateZeroParamDelegateFor(handlerType, () => OnReflectedEvent(agent, key));
-                if (addDel != null)
+                var ei = type.GetEvent(cfg.eventName, ScanFlags);
+                if (ei != null && IsZeroParamDelegateType(ei.EventHandlerType))
                 {
-                    var combined = Delegate.Combine(current, addDel);
-                    fi.SetValue(script, combined);
-                    _handlersByKey[key] = addDel;
+                    _eventsByKey[agent][key] = (script, ei);
+                    var del = CreateZeroParamDelegateFor(ei.EventHandlerType, () => OnReflectedEvent(agent, key));
+                    if (del != null)
+                    {
+                        ei.AddEventHandler(script, del);
+                        _handlersByKey[key] = del;
+                    }
+                    continue;
+                }
+
+                var fi = type.GetField(cfg.eventName, ScanFlags);
+                if (fi != null && typeof(Delegate).IsAssignableFrom(fi.FieldType) && IsZeroParamDelegateType(fi.FieldType))
+                {
+                    _fieldsByKey[agent][key] = (script, fi);
+                    var handlerType = fi.FieldType;
+                    var current = (Delegate)fi.GetValue(script);
+                    var addDel = CreateZeroParamDelegateFor(handlerType, () => OnReflectedEvent(agent, key));
+                    if (addDel != null)
+                    {
+                        var combined = Delegate.Combine(current, addDel);
+                        fi.SetValue(script, combined);
+                        _handlersByKey[key] = addDel;
+                    }
                 }
             }
         }
@@ -108,10 +113,7 @@ namespace Audio.Scripts
                     if (_eventsByKey.TryGetValue(agent, out var eMap) && eMap.TryGetValue(key, out var eInfo))
                     {
                         try { eInfo.ei.RemoveEventHandler(eInfo.script, del); }
-                        catch
-                        {
-                            // ignored
-                        }
+                        catch { /* ignored */ }
                     }
                     else if (_fieldsByKey.TryGetValue(agent, out var fMap) && fMap.TryGetValue(key, out var fInfo))
                     {
@@ -121,10 +123,7 @@ namespace Audio.Scripts
                             var removed = Delegate.Remove(current, del);
                             fInfo.fi.SetValue(fInfo.script, removed);
                         }
-                        catch
-                        {
-                            // ignored
-                        }
+                        catch { /* ignored */ }
                     }
                     _handlersByKey.Remove(key);
                 }
@@ -202,7 +201,7 @@ namespace Audio.Scripts
         {
             if (!agent) return;
 
-            var cfg = agent.FindConfigByKey(eventKey);
+            var cfg = agent.FindConfigByGuid(eventKey);
             if (cfg == null || !cfg.enabled) return;
 
             string key = eventKey;
@@ -479,27 +478,5 @@ namespace Audio.Scripts
                 else _liveVoicesByKey[key] = live;
             }
         }
-
-        public static IEnumerable<(MonoBehaviour script, string memberName)> EditorScanTargets(IList<MonoBehaviour> scripts)
-        {
-            foreach (var script in scripts.Where(s => s))
-            {
-                var type = script.GetType();
-                foreach (var ei in type.GetEvents(ScanFlags))
-                    if (IsZeroParamDelegateType(ei.EventHandlerType))
-                        yield return (script, ei.Name);
-                foreach (var fi in type.GetFields(ScanFlags))
-                {
-                    var fType = fi.FieldType;
-                    if (!typeof(Delegate).IsAssignableFrom(fType)) continue;
-                    if (!IsZeroParamDelegateType(fType)) continue;
-                    if (fi.Name.Contains("k__BackingField")) continue;
-                    yield return (script, fi.Name);
-                }
-            }
-        }
-
-        public static string MakeKeyForEditor(MonoBehaviour script, string memberName)
-            => $"{script.GetType().FullName}::{memberName}";
     }
 }

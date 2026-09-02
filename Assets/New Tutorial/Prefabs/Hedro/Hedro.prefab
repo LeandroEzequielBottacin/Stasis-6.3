@@ -256,7 +256,7 @@ MeshRenderer:
   m_SmallMeshCulling: 1
   m_ForceMeshLod: -1
   m_MeshLodSelectionBias: 0
-  m_RenderingLayerMask: 1
+  m_RenderingLayerMask: 2097153
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6551e0e09bd21984bb67b1839177ed4f, type: 2}

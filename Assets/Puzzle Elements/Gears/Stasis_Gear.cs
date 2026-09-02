@@ -254,13 +254,13 @@ namespace Puzzle_Elements.Gears
         // ---------- Visual helpers ----------
         public void SetOutlineThickness(float thickness)
         {
+            // The outline is drawn by StasisOutlineFeature off a rendering-layer bit now,
+            // not by a material on the renderer, so _BorderThickness no longer reaches
+            // anything. The thickness argument is kept as the on/off signal callers pass.
+            if (_renders == null) return;
+
             foreach (var rend in _renders)
-            {
-                if (rend == null) continue;
-                rend.GetPropertyBlock(_mpb);
-                _mpb.SetFloat(_outlineThicknessName, thickness);
-                rend.SetPropertyBlock(_mpb);
-            }
+                Stasis.Rendering.StasisRenderingLayers.SetOutline(rend, thickness > 0f);
         }
         //
         public void SetColorOutline(Color color, float alpha)

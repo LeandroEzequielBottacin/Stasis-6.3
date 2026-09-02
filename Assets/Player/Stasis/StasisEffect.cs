@@ -49,13 +49,9 @@ namespace Player.Stasis
 
         private static void Apply(Renderer rend, bool enabled)
         {
-            if (!rend) return;
-
-            // Added to whatever mask the renderer already has, never replacing it, so
-            // lighting and decal layer assignments are untouched.
-            rend.renderingLayerMask = enabled
-                ? rend.renderingLayerMask | StasisRenderingLayers.StasisMask
-                : rend.renderingLayerMask & ~StasisRenderingLayers.StasisMask;
+            // Shared with the IK tip controllers, the container arms and the gears, so
+            // the eligibility rule lives in exactly one place.
+            StasisRenderingLayers.SetOutline(rend, enabled);
         }
     }
 }

@@ -644,6 +644,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -896,6 +901,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -1061,6 +1071,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 22.151
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
@@ -1313,6 +1328,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
@@ -1572,6 +1592,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
         type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: d1d0e1c7859e0e94f95e57c56687cbfa,
+        type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -1711,6 +1736,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
@@ -1970,6 +2000,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -2135,6 +2170,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}
@@ -2306,6 +2346,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: c66bcde8137db5849a2d5e8da6fbd43a,
         type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: c66bcde8137db5849a2d5e8da6fbd43a,
+        type: 3}
       propertyPath: m_Materials.Array.size
       value: 2
       objectReference: {fileID: 0}
@@ -2467,6 +2512,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: -12.231
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 3e973680349d2a44c96712a8d86dcae2,
         type: 3}
@@ -2635,6 +2685,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
+        type: 3}
+      propertyPath: m_RenderingLayerMask
+      value: 2097153
       objectReference: {fileID: 0}
     - target: {fileID: -7511558181221131132, guid: 75e22159d3b98994eac16f7887828df9,
         type: 3}

@@ -68,6 +68,28 @@ namespace Stasis.Rendering
             [Range(0.1f, 40f)] public float jitterScale = 9f;
             [Range(0f, 10f)] public float jitterSpeed = 3f;
 
+            [Header("Glitch")]
+            [Tooltip("Cuanto se corrompe visualmente el objeto congelado. 0 = sin glitch.")]
+            [Range(0f, 1f)] public float glitchStrength = 0.5f;
+
+            [Tooltip("En cuantas franjas horizontales se corta la pantalla.")]
+            [Range(4f, 300f)] public float glitchBands = 90f;
+
+            [Tooltip("Cuantas veces por segundo se reordenan las franjas.")]
+            [Range(0f, 60f)] public float glitchRate = 14f;
+
+            [Tooltip("Que fraccion de las franjas se desplaza en cada tick.")]
+            [Range(0f, 1f)] public float glitchDensity = 0.25f;
+
+            [Tooltip("Cuanto se corre cada franja, en fraccion de pantalla.")]
+            [Range(0f, 0.1f)] public float glitchShift = 0.015f;
+
+            [Tooltip("Separacion de canales RGB, en fraccion de pantalla.")]
+            [Range(0f, 0.02f)] public float glitchRGBSplit = 0.0022f;
+
+            [Tooltip("Cuanto tine el glitch hacia el color de stasis.")]
+            [Range(0f, 1f)] public float glitchTint = 0.35f;
+
             [Header("Flicker")]
             [Range(0f, 1f)] public float flickerStrength = 0.35f;
             [Range(0f, 60f)] public float flickerSpeed = 18f;
@@ -115,6 +137,10 @@ namespace Stasis.Rendering
             var cameraType = renderingData.cameraData.cameraType;
             if (cameraType == CameraType.Preview || cameraType == CameraType.Reflection) return;
 
+            // Nothing frozen means nothing to mask, dilate or composite. Skipping here is
+            // what keeps a level with no active stasis paying zero for the effect.
+            if (!StasisRenderingLayers.AnyActive) return;
+
             _pass.renderPassEvent = settings.renderPassEvent;
             renderer.EnqueuePass(_pass);
         }
@@ -156,6 +182,14 @@ namespace Stasis.Rendering
             private static readonly int JitterSpeedId = Shader.PropertyToID("_StasisJitterSpeed");
             private static readonly int FlickerStrengthId = Shader.PropertyToID("_StasisFlickerStrength");
             private static readonly int FlickerSpeedId = Shader.PropertyToID("_StasisFlickerSpeed");
+            private static readonly int GlitchStrengthId = Shader.PropertyToID("_StasisGlitchStrength");
+            private static readonly int GlitchBandsId = Shader.PropertyToID("_StasisGlitchBands");
+            private static readonly int GlitchRateId = Shader.PropertyToID("_StasisGlitchRate");
+            private static readonly int GlitchDensityId = Shader.PropertyToID("_StasisGlitchDensity");
+            private static readonly int GlitchShiftId = Shader.PropertyToID("_StasisGlitchShift");
+            private static readonly int GlitchRGBSplitId = Shader.PropertyToID("_StasisGlitchRGBSplit");
+            private static readonly int GlitchTintId = Shader.PropertyToID("_StasisGlitchTint");
+            private static readonly int SceneColorTexId = Shader.PropertyToID("_StasisSceneColor");
             private static readonly int MaskTexId = Shader.PropertyToID("_StasisMask");
             private static readonly int DilatedTexId = Shader.PropertyToID("_StasisDilated");
             private static readonly int BlitScaleBiasId = Shader.PropertyToID("_BlitScaleBias");
@@ -195,6 +229,8 @@ namespace Stasis.Rendering
                 public Material Material;
                 public TextureHandle Mask;
                 public TextureHandle Dilated;
+                public TextureHandle SceneColor;
+                public bool HasSceneColor;
                 public Settings Settings;
             }
 
@@ -258,18 +294,41 @@ namespace Stasis.Rendering
                 }
 
                 // --- 2. grow it into a distance field -------------------------------
-                AddDilatePass(renderGraph, "Stasis Outline Dilate", mask, dilated, 0, texelSize, radius);
+                AddFullscreenPass(renderGraph, "Stasis Outline Dilate", mask, dilated, 0, texelSize, radius);
 
-                // --- 3. paint the electricity into the ring -------------------------
+                // --- 3. copy the scene colour, if the glitch needs to read it -------
+                // The composite writes into the camera target, so it cannot also sample it
+                // at an offset. The glitch displaces slices, which means reading pixels
+                // from somewhere other than where it writes.
+                bool wantsGlitch = _settings.glitchStrength > 0f;
+                TextureHandle sceneColor = TextureHandle.nullHandle;
+                if (wantsGlitch)
+                {
+                    var colorDesc = cameraData.cameraTargetDescriptor;
+                    colorDesc.depthBufferBits = 0;
+                    colorDesc.msaaSamples = 1;
+                    sceneColor = UniversalRenderer.CreateRenderGraphTexture(
+                        renderGraph, colorDesc, "_StasisSceneColor", false);
+
+                    var fullTexel = new Vector4(1f / colorDesc.width, 1f / colorDesc.height,
+                                                colorDesc.width, colorDesc.height);
+                    AddFullscreenPass(renderGraph, "Stasis Copy Scene Colour",
+                                      resourceData.activeColorTexture, sceneColor, 2, fullTexel, radius);
+                }
+
+                // --- 4. paint the electricity into the ring -------------------------
                 using (var builder = renderGraph.AddRasterRenderPass<CompositePassData>("Stasis Outline Composite", out var data))
                 {
                     data.Material = _material;
                     data.Mask = mask;
                     data.Dilated = dilated;
+                    data.SceneColor = sceneColor;
+                    data.HasSceneColor = wantsGlitch;
                     data.Settings = _settings;
 
                     builder.UseTexture(mask);
                     builder.UseTexture(dilated);
+                    if (wantsGlitch) builder.UseTexture(sceneColor);
                     builder.SetRenderAttachment(resourceData.activeColorTexture, 0, AccessFlags.ReadWrite);
                     builder.AllowPassCulling(false);
                     // The mask textures and _BlitScaleBias are bound as globals below.
@@ -301,8 +360,19 @@ namespace Stasis.Rendering
                         m.SetFloat(JitterScaleId, s.jitterScale);
                         m.SetFloat(JitterSpeedId, s.jitterSpeed);
 
+                        m.SetFloat(GlitchBandsId, s.glitchBands);
+                        m.SetFloat(GlitchRateId, s.glitchRate);
+                        m.SetFloat(GlitchDensityId, s.glitchDensity);
+                        m.SetFloat(GlitchShiftId, s.glitchShift);
+                        m.SetFloat(GlitchRGBSplitId, s.glitchRGBSplit);
+                        m.SetFloat(GlitchTintId, s.glitchTint);
+
                         m.SetFloat(FlickerStrengthId, s.flickerStrength);
                         m.SetFloat(FlickerSpeedId, s.flickerSpeed);
+
+                        // With the copy missing the glitch must not read a stale texture.
+                        m.SetFloat(GlitchStrengthId, d.HasSceneColor ? s.glitchStrength : 0f);
+                        if (d.HasSceneColor) ctx.cmd.SetGlobalTexture(SceneColorTexId, d.SceneColor);
 
                         ctx.cmd.SetGlobalTexture(MaskTexId, d.Mask);
                         ctx.cmd.SetGlobalTexture(DilatedTexId, d.Dilated);
@@ -313,7 +383,7 @@ namespace Stasis.Rendering
                 }
             }
 
-            private void AddDilatePass(RenderGraph renderGraph, string name, TextureHandle source,
+            private void AddFullscreenPass(RenderGraph renderGraph, string name, TextureHandle source,
                                        TextureHandle destination, int pass, Vector4 texelSize, float radius)
             {
                 using (var builder = renderGraph.AddRasterRenderPass<BlitPassData>(name, out var data))
