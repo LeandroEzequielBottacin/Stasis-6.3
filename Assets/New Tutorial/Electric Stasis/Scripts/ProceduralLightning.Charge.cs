@@ -2,6 +2,7 @@ using UnityEngine;
 
 public partial class ProceduralLightning
 {
+    [Tooltip("Buffer de direcciones radiales de los puntos del arco de carga. Tambien indica que el visual de carga fue preparado.")]
     private Vector3[] chargeDirections;
 
     public void PrepareChargeVisual()

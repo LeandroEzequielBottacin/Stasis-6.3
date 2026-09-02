@@ -6,56 +6,82 @@ using UnityEngine;
 public partial class ProceduralLightning
 {
     [Header("Surface Lightning Pool")]
+    [Tooltip("Pool que proporciona los rayos sobre las piezas impactadas. Debe asignarse para que comience la propagacion superficial.")]
     [SerializeField] private SurfaceLightningFactoryPool surfaceLightningPool;
 
     [Min(0f)]
+    [Tooltip("Espera en segundos entre la activacion de una pieza y la siguiente durante la propagacion. Con 0 se procesan sin espera.")]
     [SerializeField] private float delayBetweenSurfacePieces = 0.05f;
 
     [Min(1)]
+    [Tooltip("Cantidad de rayos superficiales solicitados por pieza. La cantidad efectiva depende de las instancias disponibles en el pool.")]
     [SerializeField] private int surfaceInstancesPerPiece = 1;
 
     [Range(0f, 170f)]
+    [Tooltip("Angulo de distribucion en grados de los rayos adicionales alrededor de la pieza. Solo interviene cuando hay mas de una instancia por pieza.")]
     [SerializeField] private float surfaceCoverageAngle = 95f;
 
     [Range(0f, 1f)]
+    [Tooltip("Variacion proporcional del angulo de cobertura entre instancias adicionales. Con 0 conserva el angulo configurado.")]
     [SerializeField] private float surfaceCoverageVariation = 0.25f;
 
+    [Tooltip("Muestra en la consola informacion de propagacion y advertencias sobre colliders ausentes o falta de capacidad del pool.")]
     [SerializeField] private bool showSurfaceDebugMessages;
 
     [Header("Surface Projection")]
     [Min(0f)]
+    [Tooltip("Separacion de las lineas respecto del collider en la direccion de su normal, en unidades de mundo.")]
     [SerializeField] private float surfaceLineOffset = 0.015f;
 
     [Range(0f, 1f)]
+    [Tooltip("Multiplicador de Main Displacement para la irregularidad direccional del recorrido principal sobre la superficie.")]
     [SerializeField] private float surfaceMainRoughness = 0.18f;
 
     [Range(0.01f, 1f)]
+    [Tooltip("Factor de reduccion del ruido en cada subdivision del recorrido superficial. Valores proximos a 1 conservan mas irregularidad en los detalles pequenos.")]
     [SerializeField] private float surfaceFractalDecay = 0.56f;
 
     [Range(0.05f, 1.5f)]
+    [Tooltip("Amplitud con la que las ramas se extienden alrededor de la superficie. Valores mayores alejan mas su extremo del punto de nacimiento.")]
     [SerializeField] private float surfaceBranchWrapAmount = 0.55f;
 
     [Min(0.001f)]
+    [Tooltip("Tiempo entre regeneraciones del trazado superficial, en segundos. Menor intervalo implica cambios mas rapidos y mas calculos.")]
     [SerializeField] private float surfaceGeometryRefreshInterval = 0.045f;
 
     [Range(0, 8)]
+    [Tooltip("Maxima profundidad de subdivision para separar segmentos del collider. Con 0 no refina; valores altos pueden generar mas puntos y trabajo.")]
     [SerializeField] private int surfacePathRefinementDepth = 6;
 
     [Min(0.0001f)]
+    [Tooltip("Separacion minima evaluada en el punto medio de cada segmento, en unidades de mundo. Si es menor, se intenta subdividir y proyectar hasta el limite de refinamiento.")]
     [SerializeField] private float surfaceMinimumClearance = 0.004f;
 
+    [Tooltip("Estado interno que selecciona la actualizacion superficial y evita reproducir el rayo como una instancia normal.")]
     private bool isSurfaceInstance;
+    [Tooltip("Collider sobre el cual se proyecta el recorrido de esta instancia superficial.")]
     private Collider instanceSurfaceCollider;
+    [Tooltip("Punto mundial de entrada del recorrido superficial actual.")]
     private Vector3 instanceEntryPosition;
+    [Tooltip("Punto mundial intermedio que distribuye el recorrido alrededor de la pieza.")]
     private Vector3 instanceWaypointPosition;
+    [Tooltip("Punto mundial de salida del recorrido sobre la pieza actual.")]
     private Vector3 instanceExitPosition;
+    [Tooltip("Punto mundial en la pieza conectada, anadido como ultimo punto cuando existe conexion directa habilitada.")]
     private Vector3 instanceConnectionPosition;
+    [Tooltip("Indica si esta instancia debe anadir un segmento de conexion hacia otra pieza.")]
     private bool instanceIncludesConnection;
+    [Tooltip("Tiempo transcurrido de esta instancia superficial, en segundos. Se compara con Burst Duration para terminarla.")]
     private float surfaceInstanceElapsedTime;
+    [Tooltip("Cuenta regresiva hasta regenerar el recorrido superficial, en segundos.")]
     private float surfaceGeometryRefreshTimer;
+    [Tooltip("Valor interno que cambia la semilla de la geometria al regenerar esta instancia superficial.")]
     private int surfaceGenerationIndex;
+    [Tooltip("Semilla aleatoria de la propagacion actual para distribuir las instancias entre las piezas.")]
     private int surfacePropagationSeed;
+    [Tooltip("Referencia a la corrutina que activa los rayos de las piezas con el intervalo configurado.")]
     private Coroutine surfacePropagationRoutine;
+    [Tooltip("Pool propietario al que vuelve esta instancia superficial al terminar su duracion.")]
     private SurfaceLightningFactoryPool surfacePoolOwner;
 
     private void InitializeSurfaceLightning()

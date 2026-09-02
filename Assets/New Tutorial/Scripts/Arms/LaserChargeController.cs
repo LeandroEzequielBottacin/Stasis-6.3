@@ -12,93 +12,122 @@ public class LaserChargeController : MonoBehaviour
     }
 
     [Header("Referencias")]
+    [Tooltip("SphereCollider que define el centro y radio de la carga. El script lo convierte en trigger y modifica su radio; usa escala uniforme en la jerarquia.")]
     [SerializeField] private SphereCollider energySphere;
 
     [Tooltip("Esfera visual sin collider, separada del objeto Energy Sphere.")]
     [SerializeField] private Transform energyCore;
 
+    [Tooltip("Renderer del nucleo visual. Se activa durante la carga y recibe la intensidad del shader mediante MaterialPropertyBlock.")]
     [SerializeField] private Renderer coreRenderer;
 
     [Tooltip("Prefab de ProceduralLightning con referencias internas a sus renderers.")]
     [SerializeField] private ProceduralLightning lightningPrefab;
 
+    [Tooltip("Sistema opcional de particulas que viajan hacia la esfera. El script configura sus modulos y controla la emision y el movimiento.")]
     [SerializeField] private ParticleSystem particlesIn;
+    [Tooltip("Luz opcional situada en el centro de la esfera. Su intensidad aumenta con la energia y se apaga al ocultar la carga.")]
     [SerializeField] private Light chargeLight;
 
     [Header("Tiempo y crecimiento")]
     [Min(0.05f)]
+    [Tooltip("Tiempo necesario para completar la carga, en segundos. Al terminar pasa al estado Ready.")]
     [SerializeField] private float chargeDuration = 2.5f;
 
+    [Tooltip("Curva de energia: X es el progreso de carga de 0 a 1 e Y controla tamano, brillo y actividad visual. El resultado se limita a 0 a 1.")]
     [SerializeField] private AnimationCurve energyCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
-    [Tooltip("Radio local inicial del SphereCollider. Usar escala uniforme en la jerarquía.")]
+    [Tooltip("Radio local inicial del SphereCollider. Usar escala uniforme en la jerarquia.")]
     [Min(0.01f)]
     [SerializeField] private float minimumRadius = 0.08f;
 
     [Min(0.01f)]
+    [Tooltip("Radio local maximo de la esfera antes del pulso. Un valor mayor agranda el collider y el nucleo visual al finalizar la carga.")]
     [SerializeField] private float maximumRadius = 0.55f;
 
     [Range(0f, 0.15f)]
+    [Tooltip("Amplitud proporcional del pulso de tamano y brillo durante el ultimo 25% de la carga. Por ejemplo, 0.05 equivale a una variacion de hasta el 5%.")]
     [SerializeField] private float finalPulseAmount = 0.05f;
 
     [Min(0f)]
+    [Tooltip("Frecuencia del pulso de tamano y brillo, en ciclos por segundo.")]
     [SerializeField] private float finalPulseFrequency = 12f;
 
-    [Header("Núcleo luminoso")]
-    [Tooltip("Nombre de la propiedad Float del shader del núcleo.")]
+    [Header("Nucleo luminoso")]
+    [Tooltip("Nombre de la propiedad Float del shader del nucleo.")]
     [SerializeField] private string coreIntensityProperty = "_Intensity";
 
+    [Tooltip("Intensidad del shader del nucleo: X con energia 0 e Y con energia 1. Tambien se multiplica por el pulso final.")]
     [SerializeField] private Vector2 coreIntensity = new Vector2(0.5f, 15f);
+    [Tooltip("Intensidad de la luz de carga: X con energia 0 e Y con energia 1. Tambien se multiplica por el pulso final.")]
     [SerializeField] private Vector2 lightIntensity = new Vector2(0f, 8f);
 
     [Min(0.01f)]
+    [Tooltip("Alcance de la luz de carga, en unidades de mundo.")]
     [SerializeField] private float lightRange = 5f;
 
     [Header("Rayos sobre la esfera")]
     [Range(1, 16)]
+    [Tooltip("Cantidad maxima de arcos sobre la esfera. Se crean al iniciar y su cantidad visible aumenta con la energia.")]
     [SerializeField] private int surfaceArcCount = 6;
 
     [Min(0.01f)]
+    [Tooltip("Intervalo en segundos entre cambios aleatorios de los arcos. Tambien regula los cambios de forma de los rayos entrantes; valores menores producen cambios mas rapidos.")]
     [SerializeField] private float surfaceRefreshInterval = 0.055f;
 
     [Min(0.001f)]
+    [Tooltip("Separacion de los arcos respecto de la superficie de la esfera, en unidades de mundo. Ayuda a mantener las lineas fuera del nucleo.")]
     [SerializeField] private float surfaceOffset = 0.02f;
 
+    [Tooltip("Multiplicador del brillo del prefab durante la carga: X con energia 0 e Y con energia 1. Afecta los arcos y los rayos entrantes.")]
     [SerializeField] private Vector2 lightningIntensity = new Vector2(0.25f, 2f);
+    [Tooltip("Multiplicador del grosor principal del prefab durante la carga: X con energia 0 e Y con energia 1. Se aplica al Glow y al Core de los arcos y rayos entrantes.")]
     [SerializeField] private Vector2 lightningWidth = new Vector2(0.15f, 0.6f);
 
     [Header("Rayos In")]
     [Range(1, 16)]
+    [Tooltip("Cantidad maxima de rayos entrantes simultaneos. Las instancias se crean durante Awake y se reutilizan.")]
     [SerializeField] private int inwardRayCount = 6;
 
     [Tooltip("Distancia adicional desde la superficie de la esfera, en metros mundiales.")]
     [Min(0.05f)]
     [SerializeField] private float intakeDistance = 2f;
 
+    [Tooltip("Ritmo de aparicion de rayos entrantes por segundo: X con energia 0 e Y con energia 1, limitado por las instancias disponibles.")]
     [SerializeField] private Vector2 inwardRaysPerSecond = new Vector2(2f, 20f);
+    [Tooltip("Duracion del recorrido de cada rayo entrante, en segundos: X con energia 0 e Y con energia 1. Valores menores hacen que llegue mas rapido.")]
     [SerializeField] private Vector2 inwardTravelDuration = new Vector2(0.5f, 0.16f);
 
     [Min(0f)]
+    [Tooltip("Desviacion lateral de los rayos entrantes, en unidades de mundo. Valores mayores producen un trazado mas irregular; la desviacion disminuye en los extremos del recorrido.")]
     [SerializeField] private float inwardRoughness = 0.12f;
 
     [Header("Particles In")]
+    [Tooltip("Cantidad de particulas emitidas por segundo: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particlesPerSecond = new Vector2(12f, 160f);
+    [Tooltip("Velocidad de las particulas hacia el centro, en unidades de mundo por segundo: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particleSpeed = new Vector2(1f, 7f);
+    [Tooltip("Tamano inicial de las particulas al emitirlas: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particleSize = new Vector2(0.025f, 0.07f);
 
     [ColorUsage(true, true)]
+    [Tooltip("Color asignado a las particulas al emitirlas. El resultado visible tambien depende del material del sistema de particulas.")]
     [SerializeField] private Color particleColor = new Color(0.3f, 0.8f, 1f, 1f);
 
     [Range(32, 4096)]
+    [Tooltip("Cantidad maxima de particulas y tamano del buffer reutilizado para actualizarlas. Se configura al iniciar.")]
     [SerializeField] private int maxParticles = 512;
 
     [Header("Eventos")]
+    [Tooltip("Evento ejecutado al comenzar una carga, despues de activar y actualizar sus efectos visuales.")]
     [SerializeField] private UnityEvent onChargeStarted = new UnityEvent();
+    [Tooltip("Evento ejecutado al completar la carga y entrar en Ready, antes del disparo automatico si corresponde.")]
     [SerializeField] private UnityEvent onFullyCharged = new UnityEvent();
 
-    [Tooltip("Conectar aquí el método Play/Fire de tu láser.")]
+    [Tooltip("Conectar aqui el metodo Play/Fire de tu laser.")]
     [SerializeField] private UnityEvent onFire = new UnityEvent();
 
+    [Tooltip("Evento ejecutado cuando se cancela una carga activa o lista. No se ejecuta si ya estaba en Idle.")]
     [SerializeField] private UnityEvent onChargeCancelled = new UnityEvent();
 
     public ChargeState State { get; private set; }
@@ -107,60 +136,127 @@ public class LaserChargeController : MonoBehaviour
 
 
 
-    [Header("Disparo del láser")]
+    [Header("Disparo del laser")]
+    [Tooltip("Instancia de ProceduralLightning usada para el disparo final. Shoot llama a Play unicamente si su raycast encuentra un impacto.")]
     [SerializeField] private ProceduralLightning lightning;
+    [Tooltip("Objetivo del disparo final. Fire pasa este Transform a Shoot para calcular la direccion desde Origin.")]
     [SerializeField] private Transform target;
+    [Tooltip("Transform desde cuya posicion sale el raycast y el rayo del disparo final.")]
     [SerializeField] private Transform origin;
+    [Tooltip("Distancia maxima del raycast del disparo final, en unidades de mundo.")]
     [SerializeField] private float _rayDistance;
+    [Tooltip("Capas que puede detectar el raycast del disparo final. Los colliders trigger se ignoran.")]
     [SerializeField] private LayerMask _hitLayer;
+
+    [Header("Retroceso IK")]
+    [Tooltip("Target de la restriccion IK del laser. Se mueve al disparar y vuelve a su posicion local inicial. Ningun otro controlador debe escribir su posicion durante el retroceso.")]
+    [SerializeField] private Transform recoilTarget;
+
+    [Min(0f)]
+    [Tooltip("Distancia de retroceso en unidades de mundo cuando la curva vale 1. La direccion es opuesta al disparo.")]
+    [SerializeField] private float recoilDistance = 0.25f;
+
+    [Min(0.01f)]
+    [Tooltip("Duracion total del retroceso y regreso, en segundos.")]
+    [SerializeField] private float recoilDuration = 0.4f;
+
+    [Tooltip("X: tiempo normalizado de 0 a 1. Y: desplazamiento, donde 0 es reposo y 1 es Recoil Distance. Usa inicio (0,0), pico (0.2,1) y final (1,0). Al terminar siempre se restaura la posicion inicial.")]
+    [SerializeField]
+    private AnimationCurve recoilCurve = new AnimationCurve(
+        new Keyframe(0f, 0f, 0f, 0f),
+        new Keyframe(0.2f, 1f, 0f, 0f),
+        new Keyframe(1f, 0f, 0f, 0f)
+    );
+
+    [Tooltip("Target capturado para el retroceso actual. Permite restaurarlo aunque cambie la referencia del Inspector.")]
+    private Transform activeRecoilTarget;
+
+    [Tooltip("Posicion local del Target antes del retroceso actual.")]
+    private Vector3 recoilStartLocalPosition;
+
+    [Tooltip("Desplazamiento maximo opuesto al disparo, convertido al espacio local del padre del Target.")]
+    private Vector3 recoilLocalOffset;
+
+    [Tooltip("Tiempo transcurrido del retroceso actual, en segundos.")]
+    private float recoilElapsed;
+
+    [Tooltip("Duracion capturada al iniciar el retroceso actual, en segundos.")]
+    private float activeRecoilDuration;
+
+    [Tooltip("Indica si se esta aplicando el retroceso al Target IK.")]
+    private bool recoilActive;
+
     private sealed class Arc
     {
+        [Tooltip("Instancia reutilizable de ProceduralLightning que dibuja este arco o rayo entrante.")]
         public ProceduralLightning visual;
+        [Tooltip("Direccion radial del arco o rayo en el espacio de orientacion de la esfera; se rota al mundo al dibujarlo.")]
         public Vector3 direction;
+        [Tooltip("Direccion tangente que determina el plano y sentido del arco sobre la esfera.")]
         public Vector3 tangent;
+        [Tooltip("Extension angular del arco sobre la esfera, en radianes. Se elige aleatoriamente al renovar el arco.")]
         public float angle;
+        [Tooltip("Semilla interna del ruido utilizado para generar la forma de este arco o rayo.")]
         public int seed;
     }
 
     private sealed class Incoming
     {
+        [Tooltip("Instancia reutilizable de ProceduralLightning que dibuja este arco o rayo entrante.")]
         public ProceduralLightning visual;
+        [Tooltip("Direccion radial del arco o rayo en el espacio de orientacion de la esfera; se rota al mundo al dibujarlo.")]
         public Vector3 direction;
+        [Tooltip("Tiempo transcurrido desde que se activo este rayo entrante, en segundos.")]
         public float age;
+        [Tooltip("Duracion del recorrido actual del rayo entrante, en segundos.")]
         public float duration;
+        [Tooltip("Semilla interna del ruido utilizado para generar la forma de este arco o rayo.")]
         public int seed;
+        [Tooltip("Estado interno: indica si este rayo entrante esta recorriendo su trayectoria.")]
         public bool active;
     }
 
+    [Tooltip("Instancias y datos internos de los arcos que se dibujan sobre la esfera.")]
     private Arc[] arcs;
+    [Tooltip("Instancias y datos internos de los rayos que viajan hacia la esfera.")]
     private Incoming[] rays;
 
+    [Tooltip("Objeto contenedor creado durante Awake para las instancias visuales de carga; se destruye junto con el controlador.")]
     private Transform visualRoot;
+    [Tooltip("Buffer reutilizado para leer y actualizar las particulas sin crear un array nuevo cada frame.")]
     private ParticleSystem.Particle[] particleBuffer;
+    [Tooltip("Bloque de propiedades usado para cambiar el brillo del nucleo sin modificar el material compartido.")]
     private MaterialPropertyBlock coreProperties;
 
+    [Tooltip("Identificador calculado de la propiedad del shader que controla la intensidad del nucleo.")]
     private int coreIntensityId;
 
+    [Tooltip("Estado interno: indica que las referencias y los recursos ya fueron inicializados.")]
     private bool initialized;
+    [Tooltip("Estado interno: indica si se debe disparar automaticamente al completar la carga.")]
     private bool autoFire;
 
+    [Tooltip("Tiempo transcurrido de la carga actual, en segundos.")]
     private float elapsed;
+    [Tooltip("Cuenta regresiva hasta renovar las direcciones, tangentes y semillas de los arcos de carga.")]
     private float surfaceTimer;
+    [Tooltip("Acumulador de emision de rayos entrantes. Cada unidad permite activar una instancia disponible.")]
     private float rayBudget;
+    [Tooltip("Acumulador de emision de particulas. Conserva las fracciones entre frames para mantener el ritmo configurado.")]
     private float particleBudget;
 
     private void Awake()
     {
         if (!energySphere || !energyCore || !coreRenderer || !lightningPrefab)
         {
-            Debug.LogError("LaserChargeController: faltan referencias de la esfera, núcleo, renderer o prefab de rayos.", this);
+            Debug.LogError("LaserChargeController: faltan referencias de la esfera, nucleo, renderer o prefab de rayos.", this);
             enabled = false;
             return;
         }
 
         if (energyCore == energySphere.transform || energySphere.transform.IsChildOf(energyCore))
         {
-            Debug.LogError("LaserChargeController: el collider debe estar separado del núcleo y no puede ser hijo de él.", this);
+            Debug.LogError("LaserChargeController: el collider debe estar separado del nucleo y no puede ser hijo de el.", this);
             enabled = false;
             return;
         }
@@ -169,7 +265,7 @@ public class LaserChargeController : MonoBehaviour
         coreIntensityId = Shader.PropertyToID(coreIntensityProperty);
 
         if (coreRenderer.sharedMaterial && !coreRenderer.sharedMaterial.HasProperty(coreIntensityId))
-            Debug.LogWarning("El material del núcleo no tiene " + coreIntensityProperty + ". El tamaño cambiará, pero no su brillo.", this);
+            Debug.LogWarning("El material del nucleo no tiene " + coreIntensityProperty + ". El tamano cambiara, pero no su brillo.", this);
 
         energySphere.isTrigger = true;
 
@@ -304,10 +400,95 @@ public class LaserChargeController : MonoBehaviour
             lightning.Play(origin.position, end);
         }
 
+        BeginRecoil(direction);
+
         //target.position = end;
 
         //lightning.SetEndpoints(origin, target);
     }
+    private void BeginRecoil(Vector3 shotDirection)
+    {
+        if (!isActiveAndEnabled)
+            return;
+
+        ResetRecoil();
+
+        if (!recoilTarget || recoilDistance <= 0f)
+            return;
+
+        if (shotDirection.sqrMagnitude < 0.000001f)
+            return;
+
+        activeRecoilTarget = recoilTarget;
+        recoilStartLocalPosition = activeRecoilTarget.localPosition;
+
+        Vector3 worldOffset = -shotDirection.normalized * recoilDistance;
+        Transform parent = activeRecoilTarget.parent;
+
+        if (parent)
+            recoilLocalOffset = parent.InverseTransformVector(worldOffset);
+        else
+            recoilLocalOffset = worldOffset;
+
+        recoilElapsed = 0f;
+        activeRecoilDuration = Mathf.Max(0.01f, recoilDuration);
+        recoilActive = true;
+        ApplyRecoil(0f);
+    }
+
+    private void Update()
+    {
+        if (!recoilActive)
+            return;
+
+        if (!activeRecoilTarget)
+        {
+            ResetRecoil();
+            return;
+        }
+
+        recoilElapsed += Time.deltaTime;
+
+        if (recoilElapsed >= activeRecoilDuration)
+        {
+            ResetRecoil();
+            return;
+        }
+
+        float progress = Mathf.Clamp01(recoilElapsed / activeRecoilDuration);
+        ApplyRecoil(progress);
+    }
+
+    private void ApplyRecoil(float progress)
+    {
+        float amount;
+
+        if (recoilCurve != null && recoilCurve.length > 0)
+        {
+            amount = recoilCurve.Evaluate(progress);
+        }
+        else if (progress <= 0.2f)
+        {
+            amount = Mathf.SmoothStep(0f, 1f, progress / 0.2f);
+        }
+        else
+        {
+            amount = Mathf.SmoothStep(1f, 0f, (progress - 0.2f) / 0.8f);
+        }
+
+        activeRecoilTarget.localPosition = recoilStartLocalPosition + recoilLocalOffset * amount;
+    }
+
+    private void ResetRecoil()
+    {
+        if (recoilActive && activeRecoilTarget)
+            activeRecoilTarget.localPosition = recoilStartLocalPosition;
+
+        recoilActive = false;
+        activeRecoilTarget = null;
+        recoilElapsed = 0f;
+    }
+
     private void LateUpdate()
     {
         if (!initialized || State == ChargeState.Idle)
@@ -562,6 +743,7 @@ public class LaserChargeController : MonoBehaviour
 
     private void OnDisable()
     {
+        ResetRecoil();
         CancelCharge();
     }
 
@@ -579,5 +761,7 @@ public class LaserChargeController : MonoBehaviour
         surfaceArcCount = Mathf.Clamp(surfaceArcCount, 1, 16);
         inwardRayCount = Mathf.Clamp(inwardRayCount, 1, 16);
         intakeDistance = Mathf.Max(0.05f, intakeDistance);
+        recoilDistance = Mathf.Max(0f, recoilDistance);
+        recoilDuration = Mathf.Max(0.01f, recoilDuration);
     }
 }
