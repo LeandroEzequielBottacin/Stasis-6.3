@@ -45,10 +45,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 20696965107094680}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -84,12 +84,9 @@ MonoBehaviour:
   Generator: {fileID: 7900252490712701972}
   Speed: 4
   DistanceThreshold: 0.5
-  TurningSpeed: 1
   IsLoop: 0
   IsMove: 1
-  IsEndEventEnable: 0
-  nextPath: {x: 0, y: 0, z: 0}
-  pathIndex: 1
+  InvokeEndEventAtExtremes: 0
 --- !u!114 &657277383098118935
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -103,7 +100,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isFreezed: 0
-  matStasis: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   renderers:
   - {fileID: 3919307989990484618}
   - {fileID: 1015349801524552168}
@@ -127,6 +123,7 @@ MonoBehaviour:
   - {fileID: 8229729476442318430}
   - {fileID: 7798337196110313030}
   - {fileID: 8343694642687604993}
+  _root: {fileID: 0}
   _pathFollower1: {fileID: 138781346098539614}
 --- !u!114 &2300280228989011505
 MonoBehaviour:
@@ -140,6 +137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 97741d7cf7f8a4245baeeb850dd1144b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  otherRb: {fileID: 0}
+  _otherIsMoving: 1
 --- !u!1 &1164708556707938787
 GameObject:
   m_ObjectHideFlags: 0
@@ -200,6 +199,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -221,9 +225,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &3032440931603411342
 BoxCollider:
@@ -398,6 +404,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -419,9 +430,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &5185141146024466720
 SphereCollider:
@@ -526,6 +539,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -547,9 +565,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &2617045535452929250
 BoxCollider:
@@ -703,11 +723,15 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 86d0273bb0be5e246a3a639e9375f758, type: 2}
-  - {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -725,9 +749,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &1714439083037329192
 BoxCollider:
@@ -762,7 +788,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!54 &1820848160561630367
 Rigidbody:
@@ -771,10 +797,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3226323581491432803}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -884,6 +910,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -905,9 +936,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!114 &7900252490712701972
 MonoBehaviour:
@@ -1015,11 +1048,15 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 86d0273bb0be5e246a3a639e9375f758, type: 2}
-  - {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1037,9 +1074,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &7755078940100658877
 BoxCollider:
@@ -1096,7 +1135,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &4665768403301645634
 GameObject:
@@ -1159,11 +1198,15 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 86d0273bb0be5e246a3a639e9375f758, type: 2}
-  - {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1181,9 +1224,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &7816705095437533567
 SphereCollider:
@@ -1240,7 +1285,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &6093322770241481910
 GameObject:
@@ -1302,6 +1347,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1324,9 +1374,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!135 &8627494815772049272
 SphereCollider:
@@ -1431,6 +1483,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1453,9 +1510,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &2631880931261005892
 BoxCollider:
@@ -1537,7 +1596,7 @@ Transform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &1443332906511281612
 Animator:
-  serializedVersion: 5
+  serializedVersion: 7
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1551,6 +1610,7 @@ Animator:
   m_ApplyRootMotion: 0
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
@@ -1632,6 +1692,11 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -1654,9 +1719,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &5500840091456875773
 BoxCollider:
@@ -1795,11 +1862,15 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  - {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1817,9 +1888,11 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &6625589689683446904
 BoxCollider:
@@ -1854,7 +1927,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &8020220128373564381
 GameObject:
@@ -1901,11 +1974,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -1926,21 +1999,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2091,7 +2164,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &2357235081938966208 stripped
 GameObject:
@@ -2132,7 +2205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &4599558089470906639 stripped
 MeshRenderer:
@@ -2179,7 +2252,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &5479660581393467605 stripped
 MeshRenderer:
@@ -2204,11 +2277,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2229,21 +2302,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2394,7 +2467,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &3190898284076405672 stripped
 GameObject:
@@ -2435,7 +2508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &3686799318904771687 stripped
 MeshRenderer:
@@ -2488,7 +2561,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!4 &9186015676097269471 stripped
 Transform:
@@ -2507,11 +2580,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2532,21 +2605,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2697,7 +2770,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &3154303702802522473 stripped
 GameObject:
@@ -2738,7 +2811,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &4331655373317936465 stripped
 MeshRenderer:
@@ -2791,7 +2864,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &9063631352011257906 stripped
 MeshRenderer:
@@ -2895,7 +2968,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1001 &4150471085216641541
 PrefabInstance:
@@ -2908,11 +2981,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -2933,21 +3006,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -3098,7 +3171,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1 &2745601102809981979 stripped
 GameObject:
@@ -3139,7 +3212,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &3585184961509036067 stripped
 MeshRenderer:
@@ -3198,7 +3271,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1001 &5916787415654021036
 PrefabInstance:
@@ -3211,11 +3284,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -3236,21 +3309,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -3401,7 +3474,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!4 &2602967580284025739 stripped
 Transform:
@@ -3448,7 +3521,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &6504582157019682186 stripped
 MeshRenderer:
@@ -3501,7 +3574,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!1001 &7250734652039765265
 PrefabInstance:
@@ -3514,11 +3587,11 @@ PrefabInstance:
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 601316088957870630, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 2270723309789697566, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -3539,21 +3612,21 @@ PrefabInstance:
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4202512745283376799, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
       propertyPath: m_Materials.Array.size
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5299910895704592197, guid: 4fca59ea6c24f20448129b8ed347a6b3,
         type: 3}
-      propertyPath: m_Materials.Array.data[1]
+      propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
     - target: {fileID: 5569143579298486379, guid: 4fca59ea6c24f20448129b8ed347a6b3,
@@ -3704,7 +3777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &3247896183162786388 stripped
 MeshRenderer:
@@ -3751,7 +3824,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0
 --- !u!23 &6831287375207385998 stripped
 MeshRenderer:
@@ -3804,5 +3877,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0d7b6f10a3ff2624b8fcda9ecb286e13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _stasisTipControllerPlatformMovement: {fileID: 657277383098118935}
+  stasisTipControllerPlatformMovement: {fileID: 0}
   a: 0

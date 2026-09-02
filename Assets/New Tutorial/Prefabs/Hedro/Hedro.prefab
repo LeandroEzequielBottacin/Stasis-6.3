@@ -260,7 +260,6 @@ MeshRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: 6551e0e09bd21984bb67b1839177ed4f, type: 2}
-  - {fileID: 2100000, guid: ede74eb79b9d0e94694f3cb677c03bb2, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -373,17 +372,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a1fa2c2dd870054c8f09f5d33d3315b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  targetScripts:
-  - {fileID: 7621249352648865176}
   defaultMixerGroup: {fileID: 8034880708378878856, guid: 1f041e422113c5442a038e9bf47c1459,
     type: 2}
   sourceTemplate: {fileID: 0}
   globalEmitterOverride: {fileID: 8780907131595259289}
   events:
   - guid: cbe652c8-7bb2-4395-83b8-1f910fb3bfdd
-    eventKey: Puzzle_Elements.Hedron.Scripts.PhysicsBox::OnCollision
-    displayName: PhysicsBox.OnCollision
+    targetScript: {fileID: 0}
     eventName: OnCollision
+    displayName: PhysicsBox.OnCollision
     enabled: 1
     isStopEvent: 0
     randomOne: 0
@@ -408,9 +405,9 @@ MonoBehaviour:
     coalesceWindow: 0.05
     blockSameFrameDuplicates: 1
   - guid: bd0aa4b8-81c7-460c-b1d0-c261f246c6a8
-    eventKey: Puzzle_Elements.Hedron.Scripts.PhysicsBox::OnFreezeStart
-    displayName: PhysicsBox.OnFreezeStart
+    targetScript: {fileID: 0}
     eventName: OnFreezeStart
+    displayName: PhysicsBox.OnFreezeStart
     enabled: 1
     isStopEvent: 0
     randomOne: 0
@@ -440,9 +437,9 @@ MonoBehaviour:
     coalesceWindow: 0.05
     blockSameFrameDuplicates: 1
   - guid: 6deedd09-a765-4776-a4e2-5b86f84cda4d
-    eventKey: Puzzle_Elements.Hedron.Scripts.PhysicsBox::OnFreezeStop
-    displayName: PhysicsBox.OnFreezeStop
+    targetScript: {fileID: 0}
     eventName: OnFreezeStop
+    displayName: PhysicsBox.OnFreezeStop
     enabled: 1
     isStopEvent: 1
     randomOne: 0
@@ -467,9 +464,9 @@ MonoBehaviour:
     coalesceWindow: 0.05
     blockSameFrameDuplicates: 1
   - guid: 9f8775f7-1878-4ea4-8239-ef3a0aa48858
-    eventKey: Puzzle_Elements.Hedron.Scripts.PhysicsBox::OnGrab
-    displayName: PhysicsBox.OnGrab
+    targetScript: {fileID: 0}
     eventName: OnGrab
+    displayName: PhysicsBox.OnGrab
     enabled: 1
     isStopEvent: 0
     randomOne: 0

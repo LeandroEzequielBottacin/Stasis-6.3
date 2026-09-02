@@ -10,10 +10,14 @@ namespace Stasis.Rendering
     /// <summary>
     /// Screen-space stasis outline.
     ///
-    /// Objects mark themselves by carrying the stasis outline material in an extra
-    /// slot; its StasisMask pass draws object-space position + coverage into a mask,
-    /// gated on _BorderThickness (which StasisEffect drives per renderer). We grow that
-    /// mask into a distance field and paint the electric ring in the gap.
+    /// StasisEffect sets a rendering layer bit on the renderers it freezes. We draw just
+    /// those with an override material into a mask holding object-space position and
+    /// coverage, grow that into a distance field, and paint the electric ring in the gap.
+    ///
+    /// Filtering on the layer means the cost scales with how many objects are actually in
+    /// stasis (normally one or two), not with how many could ever be frozen. Marking them
+    /// with a material slot instead cost ~12,800 draw calls and ~8,500 SetPass calls per
+    /// frame across the 6,820 renderers that carried it.
     ///
     /// Growing a mask cannot tear the way an extruded hull does, so this stays clean on
     /// hard-edged meshes where an inverted hull splits open at every corner.
@@ -72,8 +76,10 @@ namespace Stasis.Rendering
         [SerializeField] private Settings settings = new Settings();
 
         private const string ShaderPath = "Hidden/Stasis/OutlineScreen";
+        private const string MaskShaderPath = "Hidden/Stasis/OutlineMask";
 
         private Material _material;
+        private Material _maskMaterial;
         private StasisOutlinePass _pass;
 
         public override void Create()
@@ -86,8 +92,17 @@ namespace Stasis.Rendering
                 return;
             }
 
+            var maskShader = Shader.Find(MaskShaderPath);
+            if (maskShader == null)
+            {
+                Debug.LogError($"{nameof(StasisOutlineFeature)}: shader '{MaskShaderPath}' not found. " +
+                               "The stasis outline will not render.");
+                return;
+            }
+
             _material = CoreUtils.CreateEngineMaterial(shader);
-            _pass = new StasisOutlinePass(settings, _material)
+            _maskMaterial = CoreUtils.CreateEngineMaterial(maskShader);
+            _pass = new StasisOutlinePass(settings, _material, _maskMaterial)
             {
                 renderPassEvent = settings.renderPassEvent
             };
@@ -107,13 +122,17 @@ namespace Stasis.Rendering
         protected override void Dispose(bool disposing)
         {
             CoreUtils.Destroy(_material);
+            CoreUtils.Destroy(_maskMaterial);
             _material = null;
+            _maskMaterial = null;
             _pass = null;
         }
 
         private class StasisOutlinePass : ScriptableRenderPass
         {
-            private static readonly ShaderTagId MaskTag = new ShaderTagId("StasisMask");
+            // Any tag the scene's opaque materials actually have. It only decides which
+            // renderers are eligible; what gets drawn is the override material.
+            private static readonly ShaderTagId ForwardTag = new ShaderTagId("UniversalForward");
 
             private static readonly int TexelSizeId = Shader.PropertyToID("_StasisTexelSize");
             private static readonly int RadiusId = Shader.PropertyToID("_StasisRadius");
@@ -143,11 +162,13 @@ namespace Stasis.Rendering
 
             private readonly Settings _settings;
             private readonly Material _material;
+            private readonly Material _maskMaterial;
 
-            public StasisOutlinePass(Settings settings, Material material)
+            public StasisOutlinePass(Settings settings, Material material, Material maskMaterial)
             {
                 _settings = settings;
                 _material = material;
+                _maskMaterial = maskMaterial;
                 // The mask pass rejects occluded fragments against the depth texture
                 // rather than binding the camera depth as an attachment, which would
                 // force the mask to carry the camera's MSAA sample count.
@@ -206,12 +227,19 @@ namespace Stasis.Rendering
                     {
                         criteria = SortingCriteria.CommonOpaque
                     };
-                    var drawingSettings = new DrawingSettings(MaskTag, sortingSettings)
+                    var drawingSettings = new DrawingSettings(ForwardTag, sortingSettings)
                     {
                         perObjectData = PerObjectData.None,
-                        enableInstancing = true
+                        enableInstancing = true,
+                        overrideMaterial = _maskMaterial,
+                        overrideMaterialPassIndex = 0
                     };
-                    var filteringSettings = new FilteringSettings(RenderQueueRange.all);
+                    // The whole point: only renderers currently flagged as in stasis are
+                    // considered, so this costs one or two draws instead of thousands.
+                    var filteringSettings = new FilteringSettings(RenderQueueRange.all)
+                    {
+                        renderingLayerMask = StasisRenderingLayers.StasisMask
+                    };
 
                     data.RendererList = renderGraph.CreateRendererList(
                         new RendererListParams(renderingData.cullResults, drawingSettings, filteringSettings));
