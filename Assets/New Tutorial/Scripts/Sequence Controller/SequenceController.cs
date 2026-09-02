@@ -1,3 +1,4 @@
+using Puzzle_Elements.IK.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -333,7 +334,7 @@ public class SequenceController : MonoBehaviour
     [Serializable]
     public class ShootAction : SequenceAction
     {
-        public Cannon cannon;
+        public IKLaserController cannon;
 
         public float force = 10f;
 
@@ -343,13 +344,13 @@ public class SequenceController : MonoBehaviour
             SequenceController sequence
         )
         {
-            if (cannon != null)
-            {
-                cannon.Shoot(
-                    force,
-                    damage
-                );
-            }
+            //if (cannon != null)
+            //{
+            //    cannon.Shoot(
+            //        force,
+            //        damage
+            //    );
+            //}
 
             yield break;
         }

@@ -30,6 +30,7 @@ namespace Puzzle_Elements.IK.Scripts
         [Tooltip("Layer to assign when the current tip is the StartAnchor (controller mode). Use a single layer, not a mask.")]
         [SerializeField] private LayerMask _layerTipController;
 
+
         [Tooltip("Layer to assign when the current tip is 'brother' (brother mode). Use a single layer, not a mask.")]
         [SerializeField] private LayerMask _layerBrother;
 
