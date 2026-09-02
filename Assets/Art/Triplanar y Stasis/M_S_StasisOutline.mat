@@ -8,18 +8,17 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_S_StasisOutline
-  m_Shader: {fileID: -6465566751694194690, guid: a0e85d5c049c3724483655eb57f6956b,
-    type: 3}
+  m_Shader: {fileID: 4800000, guid: a34f8c79e80a41f4db54c3e9000a5541, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _DEPTHPRIME_ON
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
-  stringTagMap:
-    RenderType: Opaque
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   disabledShaderPasses:
   - SHADOWCASTER
   - MOTIONVECTORS
@@ -44,6 +43,13 @@ Material:
     - _Alpha: 1
     - _AlphaClip: 0
     - _AlphaToMask: 0
+    - _ArcBranching: 0.7
+    - _ArcScale: 55
+    - _ArcSharpness: 1.5
+    - _ArcSpeed: 2
+    - _ArcStrength: 2
+    - _ArcThinness: 70
+    - _BaseOpacity: 0.05
     - _Blend: 0
     - _BlendModePreserveSpecular: 1
     - _BorderCutoff: 2.54
@@ -53,20 +59,37 @@ Material:
     - _BorderThickness: 0
     - _CastShadows: 0
     - _Cull: 1
+    - _DepthPrime: 1
+    - _DrawHull: 0
     - _DstBlend: 0
+    - _DstBlendAlpha: 0
     - _Emission: 3.4
+    - _FlickerSpeed: 18
+    - _FlickerStrength: 0.35
+    - _FresnelBlend: 0.35
+    - _FresnelPower: 1.5
     - _Glitch_Strength: 1.12
+    - _Intensity: 1.5
+    - _JitterScale: 9
+    - _JitterSpeed: 3
+    - _JitterStrength: 0.4
     - _NoiseAmount: 1
     - _NoiseSacle: 1
     - _NoiseScale: 6
     - _Opacity: -9.95
+    - _OutlineWidth: 28.2
     - _Outline_Size: 2
+    - _PlasmaScale: 8
+    - _PlasmaSpeed: 0.8
+    - _PlasmaStrength: 0.45
     - _QueueControl: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimPow: 3
     - _Scale: 1.1
+    - _SmoothNormals: 0
     - _SrcBlend: 1
+    - _SrcBlendAlpha: 1
     - _Surface: 0
     - _WarpAmount: 1
     - _WarpStrength: 1
@@ -76,7 +99,7 @@ Material:
     - _ZWriteControl: 1
     m_Colors:
     - _BorderColor: {r: 0.2928919, g: 0.5660378, b: 0.1094696, a: 1}
-    - _Color: {r: 1.6454936, g: 3.4415908, b: 0.7597472, a: 0}
+    - _Color: {r: 1.6454936, g: 3.4415908, b: 0.7597472, a: 1}
     - _Movement: {r: 1, g: 0, b: 0, a: 0}
     - _RippleSpeed: {r: 0, g: 1, b: 0, a: 0}
     - _Scale: {r: 0, g: 1, b: 0, a: 0}

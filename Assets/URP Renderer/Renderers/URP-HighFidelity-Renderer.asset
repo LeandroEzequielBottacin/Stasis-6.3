@@ -1,5 +1,42 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7631323803195416536
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 96306b0675b922a4bb86131eac8a21f3, type: 3}
+  m_Name: StasisOutline
+  m_EditorClassIdentifier: Assembly-CSharp::Stasis.Rendering.StasisOutlineFeature
+  m_Active: 1
+  settings:
+    renderPassEvent: 550
+    widthPixels: 8
+    taps: 48
+    downsample: 1
+    edgeFalloff: 1
+    innerGlow: 0
+    color: {r: 1.6454936, g: 3.4415908, b: 0.7597472, a: 1}
+    intensity: 1.3
+    baseFloor: 0.15
+    arcStrength: 1.8
+    arcScale: 14
+    arcSpeed: 1.6
+    arcThinness: 30
+    arcSharpness: 1.5
+    arcBranching: 0.7
+    plasmaStrength: 0.5
+    plasmaScale: 4
+    plasmaSpeed: 0.8
+    jitterStrength: 0.45
+    jitterScale: 6
+    jitterSpeed: 3
+    flickerStrength: 0.35
+    flickerSpeed: 18
 --- !u!114 &-1878332245247344467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -82,6 +119,7 @@ MonoBehaviour:
   - {fileID: -1878332245247344467}
   - {fileID: 8609678965879187644}
   - {fileID: 5800229644221685381}
+  - {fileID: -7631323803195416536}
   m_RendererFeatureMap: adc0de57c6d2eee5bca8614767b97b77851e8667218e7e50
   m_UseNativeRenderPass: 0
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
