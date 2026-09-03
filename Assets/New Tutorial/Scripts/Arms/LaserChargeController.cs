@@ -1,3 +1,7 @@
+using Player.Stasis;
+using Puzzle_Elements;
+using System.Linq;
+using UIScripts.FeedBack_UI.Crosshair;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -8,7 +12,8 @@ public class LaserChargeController : MonoBehaviour
     {
         Idle,
         Charging,
-        Ready
+        Ready,
+        FinishingIntake
     }
 
     [Header("Referencias")]
@@ -26,6 +31,7 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Sistema opcional de particulas que viajan hacia la esfera. El script configura sus modulos y controla la emision y el movimiento.")]
     [SerializeField] private ParticleSystem particlesIn;
+
     [Tooltip("Luz opcional situada en el centro de la esfera. Su intensidad aumenta con la energia y se apaga al ocultar la carga.")]
     [SerializeField] private Light chargeLight;
 
@@ -59,6 +65,7 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Intensidad del shader del nucleo: X con energia 0 e Y con energia 1. Tambien se multiplica por el pulso final.")]
     [SerializeField] private Vector2 coreIntensity = new Vector2(0.5f, 15f);
+
     [Tooltip("Intensidad de la luz de carga: X con energia 0 e Y con energia 1. Tambien se multiplica por el pulso final.")]
     [SerializeField] private Vector2 lightIntensity = new Vector2(0f, 8f);
 
@@ -81,6 +88,7 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Multiplicador del brillo del prefab durante la carga: X con energia 0 e Y con energia 1. Afecta los arcos y los rayos entrantes.")]
     [SerializeField] private Vector2 lightningIntensity = new Vector2(0.25f, 2f);
+
     [Tooltip("Multiplicador del grosor principal del prefab durante la carga: X con energia 0 e Y con energia 1. Se aplica al Glow y al Core de los arcos y rayos entrantes.")]
     [SerializeField] private Vector2 lightningWidth = new Vector2(0.15f, 0.6f);
 
@@ -95,6 +103,7 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Ritmo de aparicion de rayos entrantes por segundo: X con energia 0 e Y con energia 1, limitado por las instancias disponibles.")]
     [SerializeField] private Vector2 inwardRaysPerSecond = new Vector2(2f, 20f);
+
     [Tooltip("Duracion del recorrido de cada rayo entrante, en segundos: X con energia 0 e Y con energia 1. Valores menores hacen que llegue mas rapido.")]
     [SerializeField] private Vector2 inwardTravelDuration = new Vector2(0.5f, 0.16f);
 
@@ -105,8 +114,10 @@ public class LaserChargeController : MonoBehaviour
     [Header("Particles In")]
     [Tooltip("Cantidad de particulas emitidas por segundo: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particlesPerSecond = new Vector2(12f, 160f);
+
     [Tooltip("Velocidad de las particulas hacia el centro, en unidades de mundo por segundo: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particleSpeed = new Vector2(1f, 7f);
+
     [Tooltip("Tamano inicial de las particulas al emitirlas: X con energia 0 e Y con energia 1.")]
     [SerializeField] private Vector2 particleSize = new Vector2(0.025f, 0.07f);
 
@@ -121,10 +132,11 @@ public class LaserChargeController : MonoBehaviour
     [Header("Eventos")]
     [Tooltip("Evento ejecutado al comenzar una carga, despues de activar y actualizar sus efectos visuales.")]
     [SerializeField] private UnityEvent onChargeStarted = new UnityEvent();
+
     [Tooltip("Evento ejecutado al completar la carga y entrar en Ready, antes del disparo automatico si corresponde.")]
     [SerializeField] private UnityEvent onFullyCharged = new UnityEvent();
 
-    [Tooltip("Conectar aqui el metodo Play/Fire de tu laser.")]
+    [Tooltip("Evento del disparo real, despues de que terminan las particulas y rayos entrantes. El laser asignado ya se reproduce desde Shoot.")]
     [SerializeField] private UnityEvent onFire = new UnityEvent();
 
     [Tooltip("Evento ejecutado cuando se cancela una carga activa o lista. No se ejecuta si ya estaba en Idle.")]
@@ -134,17 +146,19 @@ public class LaserChargeController : MonoBehaviour
     public float Charge01 { get; private set; }
     public bool IsReady => State == ChargeState.Ready;
 
-
-
     [Header("Disparo del laser")]
     [Tooltip("Instancia de ProceduralLightning usada para el disparo final. Shoot llama a Play unicamente si su raycast encuentra un impacto.")]
     [SerializeField] private ProceduralLightning lightning;
+
     [Tooltip("Objetivo del disparo final. Fire pasa este Transform a Shoot para calcular la direccion desde Origin.")]
     [SerializeField] private Transform target;
+
     [Tooltip("Transform desde cuya posicion sale el raycast y el rayo del disparo final.")]
     [SerializeField] private Transform origin;
+
     [Tooltip("Distancia maxima del raycast del disparo final, en unidades de mundo.")]
     [SerializeField] private float _rayDistance;
+
     [Tooltip("Capas que puede detectar el raycast del disparo final. Los colliders trigger se ignoran.")]
     [SerializeField] private LayerMask _hitLayer;
 
@@ -190,12 +204,16 @@ public class LaserChargeController : MonoBehaviour
     {
         [Tooltip("Instancia reutilizable de ProceduralLightning que dibuja este arco o rayo entrante.")]
         public ProceduralLightning visual;
+
         [Tooltip("Direccion radial del arco o rayo en el espacio de orientacion de la esfera; se rota al mundo al dibujarlo.")]
         public Vector3 direction;
+
         [Tooltip("Direccion tangente que determina el plano y sentido del arco sobre la esfera.")]
         public Vector3 tangent;
+
         [Tooltip("Extension angular del arco sobre la esfera, en radianes. Se elige aleatoriamente al renovar el arco.")]
         public float angle;
+
         [Tooltip("Semilla interna del ruido utilizado para generar la forma de este arco o rayo.")]
         public int seed;
     }
@@ -204,27 +222,35 @@ public class LaserChargeController : MonoBehaviour
     {
         [Tooltip("Instancia reutilizable de ProceduralLightning que dibuja este arco o rayo entrante.")]
         public ProceduralLightning visual;
+
         [Tooltip("Direccion radial del arco o rayo en el espacio de orientacion de la esfera; se rota al mundo al dibujarlo.")]
         public Vector3 direction;
+
         [Tooltip("Tiempo transcurrido desde que se activo este rayo entrante, en segundos.")]
         public float age;
+
         [Tooltip("Duracion del recorrido actual del rayo entrante, en segundos.")]
         public float duration;
+
         [Tooltip("Semilla interna del ruido utilizado para generar la forma de este arco o rayo.")]
         public int seed;
+
         [Tooltip("Estado interno: indica si este rayo entrante esta recorriendo su trayectoria.")]
         public bool active;
     }
 
     [Tooltip("Instancias y datos internos de los arcos que se dibujan sobre la esfera.")]
     private Arc[] arcs;
+
     [Tooltip("Instancias y datos internos de los rayos que viajan hacia la esfera.")]
     private Incoming[] rays;
 
     [Tooltip("Objeto contenedor creado durante Awake para las instancias visuales de carga; se destruye junto con el controlador.")]
     private Transform visualRoot;
+
     [Tooltip("Buffer reutilizado para leer y actualizar las particulas sin crear un array nuevo cada frame.")]
     private ParticleSystem.Particle[] particleBuffer;
+
     [Tooltip("Bloque de propiedades usado para cambiar el brillo del nucleo sin modificar el material compartido.")]
     private MaterialPropertyBlock coreProperties;
 
@@ -233,15 +259,19 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Estado interno: indica que las referencias y los recursos ya fueron inicializados.")]
     private bool initialized;
+
     [Tooltip("Estado interno: indica si se debe disparar automaticamente al completar la carga.")]
     private bool autoFire;
 
     [Tooltip("Tiempo transcurrido de la carga actual, en segundos.")]
     private float elapsed;
+
     [Tooltip("Cuenta regresiva hasta renovar las direcciones, tangentes y semillas de los arcos de carga.")]
     private float surfaceTimer;
+
     [Tooltip("Acumulador de emision de rayos entrantes. Cada unidad permite activar una instancia disponible.")]
     private float rayBudget;
+
     [Tooltip("Acumulador de emision de particulas. Conserva las fracciones entre frames para mantener el ritmo configurado.")]
     private float particleBudget;
 
@@ -388,6 +418,7 @@ public class LaserChargeController : MonoBehaviour
         UpdateVisuals(0f);
         onChargeStarted.Invoke();
     }
+
     public void Shoot(Transform target)
     {
         Vector3 start = origin.position;
@@ -398,6 +429,50 @@ public class LaserChargeController : MonoBehaviour
         {
             end = hit.point;
             lightning.Play(origin.position, end);
+
+
+            // >>> NUEVO BLOQUE: resolver IStasis desde proxy o desde padres <<<
+            IStasis stasisComponent = null;
+            GameObject objStaseable = null;
+
+            // 1) Si le pegamos a un proxy registrado
+            if (StasisRegistry.TryGet(hit.collider, out var stasisFromProxy))
+            {
+                stasisComponent = stasisFromProxy;
+                objStaseable = ((MonoBehaviour)stasisComponent).gameObject;
+            }
+            else
+            {
+                // 2) Buscar en la jerarquía del objeto impactado (plataforma hija - engrane padre)
+                var stasisInParents = hit.collider.GetComponentInParent<IStasis>();
+                if (stasisInParents != null)
+                {
+                    stasisComponent = stasisInParents;
+                    objStaseable = ((MonoBehaviour)stasisComponent).gameObject;
+                }
+            }
+
+            if (stasisComponent != null)
+            {
+                // 3) Mantener tu lógica de StasisRoot (si existe, preferir el IStasis dentro del root)
+                var root = objStaseable.GetComponentInParent<StasisRoot>();
+                if (root)
+                {
+                    var found = root.GetComponentsInChildren<MonoBehaviour>()
+                                    .OfType<IStasis>()
+                                    .FirstOrDefault();
+                    if (found != null)
+                    {
+                        stasisComponent = found;
+                        objStaseable = ((MonoBehaviour)stasisComponent).gameObject;
+                    }
+                }
+
+
+                stasisComponent.StatisEffectActivate();
+            }
+
+
         }
 
         BeginRecoil(direction);
@@ -406,6 +481,7 @@ public class LaserChargeController : MonoBehaviour
 
         //lightning.SetEndpoints(origin, target);
     }
+
     private void BeginRecoil(Vector3 shotDirection)
     {
         if (!isActiveAndEnabled)
@@ -512,14 +588,39 @@ public class LaserChargeController : MonoBehaviour
             if (autoFire && State == ChargeState.Ready)
                 Fire();
         }
+
+        TryCompleteFire();
     }
 
     [ContextMenu("Play / Fire")]
     public void Fire()
     {
-        if (!initialized || State != ChargeState.Ready)
+        if (!initialized || !isActiveAndEnabled || State != ChargeState.Ready)
             return;
 
+        // Deja de emitir, pero mantiene la esfera y actualiza lo que ya esta viajando.
+        State = ChargeState.FinishingIntake;
+        rayBudget = 0f;
+        particleBudget = 0f;
+
+        TryCompleteFire();
+    }
+
+    private void TryCompleteFire()
+    {
+        if (State != ChargeState.FinishingIntake)
+            return;
+
+        foreach (Incoming ray in rays)
+        {
+            if (ray.active)
+                return;
+        }
+
+        if (particlesIn && particlesIn.particleCount > 0)
+            return;
+
+        // Los efectos entrantes terminaron. Ahora se dispara y comienza el retroceso.
         State = ChargeState.Idle;
         Charge01 = 0f;
 
@@ -621,12 +722,17 @@ public class LaserChargeController : MonoBehaviour
 
     private void UpdateIncoming(float dt, float energy, Vector3 center, float radius, float intensity, float width)
     {
-        float spawnRate = Mathf.Max(0f, Mathf.Lerp(inwardRaysPerSecond.x, inwardRaysPerSecond.y, energy));
-        rayBudget = Mathf.Min(rays.Length, rayBudget + dt * spawnRate);
+        bool allowEmission = State != ChargeState.FinishingIntake;
+
+        if (allowEmission)
+        {
+            float spawnRate = Mathf.Max(0f, Mathf.Lerp(inwardRaysPerSecond.x, inwardRaysPerSecond.y, energy));
+            rayBudget = Mathf.Min(rays.Length, rayBudget + dt * spawnRate);
+        }
 
         foreach (Incoming ray in rays)
         {
-            if (!ray.active && rayBudget >= 1f)
+            if (allowEmission && !ray.active && rayBudget >= 1f)
             {
                 rayBudget -= 1f;
 
@@ -671,11 +777,15 @@ public class LaserChargeController : MonoBehaviour
 
         Transform space = energySphere.transform;
 
-        float spawnRate = Mathf.Max(0f, Mathf.Lerp(particlesPerSecond.x, particlesPerSecond.y, energy));
-        particleBudget = Mathf.Min(maxParticles, particleBudget + dt * spawnRate);
+        int spawn = 0;
 
-        int spawn = Mathf.FloorToInt(particleBudget);
-        particleBudget -= spawn;
+        if (State != ChargeState.FinishingIntake)
+        {
+            float spawnRate = Mathf.Max(0f, Mathf.Lerp(particlesPerSecond.x, particlesPerSecond.y, energy));
+            particleBudget = Mathf.Min(maxParticles, particleBudget + dt * spawnRate);
+            spawn = Mathf.FloorToInt(particleBudget);
+            particleBudget -= spawn;
+        }
 
         for (int i = 0; i < spawn; i++)
         {
