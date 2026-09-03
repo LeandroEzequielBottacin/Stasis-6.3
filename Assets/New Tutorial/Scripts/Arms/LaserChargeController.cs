@@ -13,7 +13,8 @@ public class LaserChargeController : MonoBehaviour
         Idle,
         Charging,
         Ready,
-        FinishingIntake
+        FinishingIntake,
+        AfterFire
     }
 
     [Header("Referencias")]
@@ -34,6 +35,14 @@ public class LaserChargeController : MonoBehaviour
 
     [Tooltip("Luz opcional situada en el centro de la esfera. Su intensidad aumenta con la energia y se apaga al ocultar la carga.")]
     [SerializeField] private Light chargeLight;
+
+    [Header("Duracion despues del disparo")]
+    [Min(0f)]
+    [Tooltip("Segundos que permanecen el Core, la luz y los arcos despues de invocar el laser. El aura conserva el punto de su ventana temporal alcanzado al disparar. No reinicia particulas ni rayos In. Con 0 se apaga todo al disparar.")]
+    [SerializeField] private float lifeTime = 0.5f;
+
+    [Tooltip("Segundos restantes de los efectos despues del disparo. Se reinicia en cada disparo y se limpia al ocultar los efectos.")]
+    private float remainingLifeTime;
 
     [Header("Tiempo y crecimiento")]
     [Min(0.05f)]
@@ -205,11 +214,11 @@ public class LaserChargeController : MonoBehaviour
     [SerializeField] private bool auraEnabled = true;
 
     [Min(0f)]
-    [Tooltip("Segundos desde BeginCharge o ChargeAndFire hasta que aparece el aura. El reloj continua durante Ready y FinishingIntake. Si el laser dispara antes, el aura no aparece.")]
+    [Tooltip("Segundos desde BeginCharge o ChargeAndFire hasta que aparece el aura. El reloj continua durante Ready y FinishingIntake. Al disparar se congela este reloj durante Life Time; si aun no comenzo, no aparece.")]
     [SerializeField] private float auraStartTime = 1.5f;
 
     [Min(0f)]
-    [Tooltip("Duracion total del aura en segundos desde Aura Start Time. Con 0 no se muestra. Se apaga antes si disparas o cancelas; nunca retrasa el disparo.")]
+    [Tooltip("Duracion total del aura en segundos desde Aura Start Time. Con 0 no se muestra. Al disparar se congela su reloj durante Life Time. Se apaga al cancelar o terminar Life Time; nunca retrasa el disparo.")]
     [SerializeField] private float auraDuration = 1f;
 
     [Range(1, 32)]
@@ -524,6 +533,7 @@ public class LaserChargeController : MonoBehaviour
     public void Shoot(Transform target)
     {
         Vector3 start = origin.position;
+    
         Vector3 direction = target.position - start;
         Vector3 end = start + direction * _rayDistance;
 
@@ -673,6 +683,25 @@ public class LaserChargeController : MonoBehaviour
             return;
 
         float dt = Time.deltaTime;
+
+        if (State == ChargeState.AfterFire)
+        {
+            remainingLifeTime -= dt;
+
+            if (remainingLifeTime <= 0f)
+            {
+                State = ChargeState.Idle;
+                Charge01 = 0f;
+                HideVisuals();
+                return;
+            }
+
+            // Sigue animando la esfera, sus arcos y ramas, sin emitir efectos In.
+            // El reloj del aura queda congelado para conservar su estado visual.
+            UpdateVisuals(dt);
+            return;
+        }
+
         auraElapsed += dt;
 
         if (State == ChargeState.Charging)
@@ -723,11 +752,20 @@ public class LaserChargeController : MonoBehaviour
         if (particlesIn && particlesIn.particleCount > 0)
             return;
 
-        // Los efectos entrantes terminaron. Ahora se dispara y comienza el retroceso.
-        State = ChargeState.Idle;
-        Charge01 = 0f;
+        // Los efectos entrantes terminaron. El laser se invoca ahora, sin otra espera.
+        remainingLifeTime = Mathf.Max(0f, lifeTime);
 
-        HideVisuals();
+        if (remainingLifeTime > 0f)
+        {
+            State = ChargeState.AfterFire;
+        }
+        else
+        {
+            State = ChargeState.Idle;
+            Charge01 = 0f;
+            HideVisuals();
+        }
+
         Shoot(target);
         onFire.Invoke();
     }
@@ -738,7 +776,7 @@ public class LaserChargeController : MonoBehaviour
         if (!initialized)
             return;
 
-        bool wasActive = State != ChargeState.Idle;
+        bool wasActive = State == ChargeState.Charging || State == ChargeState.Ready || State == ChargeState.FinishingIntake;
 
         State = ChargeState.Idle;
         Charge01 = 0f;
@@ -826,7 +864,7 @@ public class LaserChargeController : MonoBehaviour
 
     private void UpdateIncoming(float dt, float energy, Vector3 center, float radius, float intensity, float width)
     {
-        bool allowEmission = State != ChargeState.FinishingIntake;
+        bool allowEmission = State == ChargeState.Charging || State == ChargeState.Ready;
 
         if (allowEmission)
         {
@@ -883,7 +921,7 @@ public class LaserChargeController : MonoBehaviour
 
         int spawn = 0;
 
-        if (State != ChargeState.FinishingIntake)
+        if (State == ChargeState.Charging || State == ChargeState.Ready)
         {
             float spawnRate = Mathf.Max(0f, Mathf.Lerp(particlesPerSecond.x, particlesPerSecond.y, energy));
             particleBudget = Mathf.Min(maxParticles, particleBudget + dt * spawnRate);
@@ -931,6 +969,7 @@ public class LaserChargeController : MonoBehaviour
 
     private void HideVisuals()
     {
+        remainingLifeTime = 0f;
         HideAura();
         auraElapsed = 0f;
         auraRefreshTimer = 0f;
@@ -1084,6 +1123,7 @@ public class LaserChargeController : MonoBehaviour
 
     private void OnValidate()
     {
+        lifeTime = Mathf.Max(0f, lifeTime);
         chargeDuration = Mathf.Max(0.05f, chargeDuration);
         minimumRadius = Mathf.Max(0.01f, minimumRadius);
         maximumRadius = Mathf.Max(minimumRadius, maximumRadius);
