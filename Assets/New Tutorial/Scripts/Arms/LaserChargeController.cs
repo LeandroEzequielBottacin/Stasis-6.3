@@ -200,6 +200,106 @@ public class LaserChargeController : MonoBehaviour
     [Tooltip("Indica si se esta aplicando el retroceso al Target IK.")]
     private bool recoilActive;
 
+    [Header("Aura electrica envolvente")]
+    [Tooltip("Activa arcos completos que abrazan una esfera invisible mas grande alrededor del Core. No viajan hacia adentro ni hacia afuera.")]
+    [SerializeField] private bool auraEnabled = true;
+
+    [Min(0f)]
+    [Tooltip("Segundos desde BeginCharge o ChargeAndFire hasta que aparece el aura. El reloj continua durante Ready y FinishingIntake. Si el laser dispara antes, el aura no aparece.")]
+    [SerializeField] private float auraStartTime = 1.5f;
+
+    [Min(0f)]
+    [Tooltip("Duracion total del aura en segundos desde Aura Start Time. Con 0 no se muestra. Se apaga antes si disparas o cancelas; nunca retrasa el disparo.")]
+    [SerializeField] private float auraDuration = 1f;
+
+    [Range(1, 32)]
+    [Tooltip("Cantidad de descargas disponibles para el aura. Se crean en Awake y se reutilizan. Configurar antes de entrar en Play.")]
+    [SerializeField] private int auraRayCount = 8;
+
+    [Min(1.01f)]
+    [Tooltip("Radio de la esfera invisible respecto del Core. Con 1.35 los rayos envuelven una esfera un 35% mas grande. No necesitas crear otro Core ni otro collider.")]
+    [SerializeField] private float auraRadiusMultiplier = 1.35f;
+
+    [Tooltip("Angulo minimo X y maximo Y de cada arco, en grados. Valores mayores abrazan mas superficie. Se limita entre 5 y 170 grados.")]
+    [SerializeField] private Vector2 auraArcAngle = new Vector2(75f, 155f);
+
+    [Min(0.001f)]
+    [Tooltip("Separacion adicional de los arcos respecto de la esfera invisible exterior, en unidades de mundo.")]
+    [SerializeField] private float auraSurfaceOffset = 0.02f;
+
+    [Min(0.01f)]
+    [Tooltip("Segundos entre cambios de posicion, forma y visibilidad de las descargas. Un valor menor produce un parpadeo mas rapido.")]
+    [SerializeField] private float auraRefreshInterval = 0.055f;
+
+    [Range(0f, 1f)]
+    [Tooltip("Probabilidad de mostrar cada descarga al renovar el aura. Con 1 se muestran todas; con 0 ninguna.")]
+    [SerializeField] private float auraVisibleChance = 0.7f;
+
+    [Min(0f)]
+    [Tooltip("Multiplicador de las intensidades Glow y Core del prefab para el aura. Independiente del brillo de los Rayos In.")]
+    [SerializeField] private float auraIntensity = 1.5f;
+
+    [Min(0f)]
+    [Tooltip("Multiplicador de los grosores Glow y Core del prefab para el aura. Independiente del grosor de los Rayos In.")]
+    [SerializeField] private float auraWidth = 0.4f;
+
+    [Header("Ramificaciones del aura")]
+    [Range(0, 16)]
+    [Tooltip("Maximo de ramas por arco del aura. Se crean automaticamente en Awake usando los materiales principales del prefab. Configurar antes de Play; con 0 se desactivan.")]
+    [SerializeField] private int auraBranchesPerArc = 3;
+
+    [Tooltip("Longitud minima X y maxima Y de las ramas que sobresalen del arco, en unidades de mundo.")]
+    [SerializeField] private Vector2 auraBranchLength = new Vector2(0.12f, 0.45f);
+
+    [Range(0f, 1f)]
+    [Tooltip("Probabilidad de que aparezca cada rama al cambiar la forma del aura. Con 1 aparecen todas las disponibles.")]
+    [SerializeField] private float auraBranchChance = 0.7f;
+
+    [Min(0f)]
+    [Tooltip("Amplitud lateral de los quiebres de las ramas en unidades de mundo. El ruido mantiene las ramas fuera de la esfera.")]
+    [SerializeField] private float auraBranchRoughness = 0.08f;
+
+    [Range(0f, 2f)]
+    [Tooltip("Apertura lateral de las ramas respecto de la normal exterior. Con 0 apuntan radialmente; valores mayores crean direcciones mas inclinadas.")]
+    [SerializeField] private float auraBranchSpread = 0.65f;
+
+    [Min(0f)]
+    [Tooltip("Multiplicador extra del grosor de las ramas del aura. Se combina con Aura Width y los grosores Main Glow/Core Width del prefab.")]
+    [SerializeField] private float auraBranchWidth = 0.8f;
+
+    private sealed class AuraRay
+    {
+        [Tooltip("Instancia reutilizable de ProceduralLightning dedicada a este arco envolvente.")]
+        public ProceduralLightning visual;
+
+        [Tooltip("Direccion radial inicial del arco en el espacio de orientacion de la esfera.")]
+        public Vector3 normal;
+
+        [Tooltip("Tangente perpendicular a la direccion radial; define el plano del arco envolvente.")]
+        public Vector3 tangent;
+
+        [Tooltip("Extension angular actual del arco, en radianes.")]
+        public float angle;
+
+        [Tooltip("Semilla actual del ruido geometrico de esta descarga.")]
+        public int seed;
+
+        [Tooltip("Visibilidad actual de esta descarga durante el parpadeo.")]
+        public bool visible;
+    }
+
+    [Tooltip("Instancias y datos reutilizados del aura envolvente.")]
+    private AuraRay[] auraRays;
+
+    [Tooltip("Generador aleatorio independiente para no alterar la secuencia aleatoria de los efectos In ni de los arcos del Core.")]
+    private System.Random auraRandom;
+
+    [Tooltip("Segundos transcurridos desde el inicio de la carga, incluyendo Ready y FinishingIntake.")]
+    private float auraElapsed;
+
+    [Tooltip("Cuenta regresiva hasta renovar el parpadeo y la geometria del aura.")]
+    private float auraRefreshTimer;
+
     private sealed class Arc
     {
         [Tooltip("Instancia reutilizable de ProceduralLightning que dibuja este arco o rayo entrante.")]
@@ -314,6 +414,8 @@ public class LaserChargeController : MonoBehaviour
 
         for (int i = 0; i < rays.Length; i++)
             rays[i] = new Incoming { visual = CreateVisual() };
+
+        InitializeAura();
 
         if (particlesIn)
             ConfigureParticles();
@@ -443,7 +545,7 @@ public class LaserChargeController : MonoBehaviour
             }
             else
             {
-                // 2) Buscar en la jerarquía del objeto impactado (plataforma hija - engrane padre)
+                // 2) Buscar en la jerarquia del objeto impactado (plataforma hija - engrane padre)
                 var stasisInParents = hit.collider.GetComponentInParent<IStasis>();
                 if (stasisInParents != null)
                 {
@@ -454,7 +556,7 @@ public class LaserChargeController : MonoBehaviour
 
             if (stasisComponent != null)
             {
-                // 3) Mantener tu lógica de StasisRoot (si existe, preferir el IStasis dentro del root)
+                // 3) Mantener tu logica de StasisRoot (si existe, preferir el IStasis dentro del root)
                 var root = objStaseable.GetComponentInParent<StasisRoot>();
                 if (root)
                 {
@@ -571,6 +673,7 @@ public class LaserChargeController : MonoBehaviour
             return;
 
         float dt = Time.deltaTime;
+        auraElapsed += dt;
 
         if (State == ChargeState.Charging)
         {
@@ -704,6 +807,7 @@ public class LaserChargeController : MonoBehaviour
             arc.visual.DrawChargeSphere(center, radius, direction, tangent, arc.angle, surfaceOffset, intensity, width, arc.seed);
         }
 
+        UpdateAura(dt, center, radius);
         UpdateIncoming(dt, energy, center, radius, intensity, width);
         UpdateParticles(dt, energy, center, radius);
     }
@@ -827,6 +931,10 @@ public class LaserChargeController : MonoBehaviour
 
     private void HideVisuals()
     {
+        HideAura();
+        auraElapsed = 0f;
+        auraRefreshTimer = 0f;
+
         coreRenderer.enabled = false;
         energySphere.enabled = false;
 
@@ -843,6 +951,117 @@ public class LaserChargeController : MonoBehaviour
         {
             ray.active = false;
             ray.visual.HideChargeVisual();
+        }
+    }
+
+    private void InitializeAura()
+    {
+        auraRandom = new System.Random();
+        auraRays = new AuraRay[Mathf.Clamp(auraRayCount, 1, 32)];
+
+        for (int i = 0; i < auraRays.Length; i++)
+        {
+            auraRays[i] = new AuraRay();
+            auraRays[i].visual = CreateVisual();
+            auraRays[i].visual.PrepareAuraBranches(auraBranchesPerArc);
+        }
+    }
+
+    private void UpdateAura(float dt, Vector3 center, float radius)
+    {
+        float startTime = Mathf.Max(0f, auraStartTime);
+        float duration = Mathf.Max(0f, auraDuration);
+        float endTime = startTime + duration;
+
+        if (!auraEnabled || duration <= 0f || auraElapsed < startTime || auraElapsed >= endTime)
+        {
+            HideAura();
+            auraRefreshTimer = 0f;
+            return;
+        }
+
+        auraRefreshTimer -= dt;
+
+        if (auraRefreshTimer <= 0f)
+        {
+            RandomizeAura();
+            auraRefreshTimer = Mathf.Max(0.01f, auraRefreshInterval);
+        }
+
+        // Apaga suavemente el aura al finalizar su ventana de tiempo.
+        float fadeDuration = Mathf.Min(0.1f, duration * 0.2f);
+        float fade = Mathf.Clamp01((endTime - auraElapsed) / fadeDuration);
+        float intensity = Mathf.Max(0f, auraIntensity) * fade;
+        float width = Mathf.Max(0f, auraWidth);
+        float offset = Mathf.Max(0.001f, auraSurfaceOffset);
+        float shellRadius = radius * Mathf.Max(1.01f, auraRadiusMultiplier);
+        Quaternion rotation = energySphere.transform.rotation;
+
+        foreach (AuraRay ray in auraRays)
+        {
+            if (!ray.visible)
+            {
+                ray.visual.HideChargeVisual();
+                continue;
+            }
+
+            Vector3 direction = rotation * ray.normal;
+            Vector3 tangent = rotation * ray.tangent;
+
+            // El arco recorre la esfera exterior en toda su longitud.
+            // Ambos extremos permanecen sobre esa envoltura.
+            ray.visual.DrawChargeAura(center, shellRadius, direction, tangent, ray.angle, offset, intensity, width, ray.seed, auraBranchesPerArc, auraBranchLength, auraBranchChance, auraBranchRoughness, auraBranchSpread, auraBranchWidth);
+        }
+    }
+
+    private void RandomizeAura()
+    {
+        float minimumAngle = Mathf.Clamp(auraArcAngle.x, 5f, 170f);
+        float maximumAngle = Mathf.Clamp(auraArcAngle.y, minimumAngle, 170f);
+        float chance = Mathf.Clamp01(auraVisibleChance);
+
+        foreach (AuraRay ray in auraRays)
+        {
+            ray.visible = auraRandom.NextDouble() < chance;
+
+            if (!ray.visible)
+                continue;
+
+            // Muestreo uniforme de normales alrededor de toda la esfera.
+            float vertical = (float)auraRandom.NextDouble() * 2f - 1f;
+            float angle = (float)auraRandom.NextDouble() * Mathf.PI * 2f;
+            float horizontal = Mathf.Sqrt(Mathf.Max(0f, 1f - vertical * vertical));
+
+            ray.normal = new Vector3(
+                horizontal * Mathf.Cos(angle),
+                vertical,
+                horizontal * Mathf.Sin(angle)
+            );
+
+            Vector3 reference = Vector3.up;
+
+            if (Mathf.Abs(ray.normal.y) > 0.95f)
+                reference = Vector3.right;
+
+            ray.tangent = Vector3.Cross(ray.normal, reference).normalized;
+            float twist = (float)auraRandom.NextDouble() * 360f;
+            ray.tangent = Quaternion.AngleAxis(twist, ray.normal) * ray.tangent;
+            ray.angle = Mathf.Lerp(minimumAngle, maximumAngle, (float)auraRandom.NextDouble()) * Mathf.Deg2Rad;
+            ray.seed = auraRandom.Next(0, 10000);
+        }
+    }
+
+    private void HideAura()
+    {
+        if (auraRays == null)
+            return;
+
+        foreach (AuraRay ray in auraRays)
+        {
+            ray.visible = false;
+
+            if (ray.visual)
+                ray.visual.HideChargeVisual();
         }
     }
 
@@ -873,5 +1092,23 @@ public class LaserChargeController : MonoBehaviour
         intakeDistance = Mathf.Max(0.05f, intakeDistance);
         recoilDistance = Mathf.Max(0f, recoilDistance);
         recoilDuration = Mathf.Max(0.01f, recoilDuration);
+        auraStartTime = Mathf.Max(0f, auraStartTime);
+        auraDuration = Mathf.Max(0f, auraDuration);
+        auraRayCount = Mathf.Clamp(auraRayCount, 1, 32);
+        auraRadiusMultiplier = Mathf.Max(1.01f, auraRadiusMultiplier);
+        auraArcAngle.x = Mathf.Clamp(auraArcAngle.x, 5f, 170f);
+        auraArcAngle.y = Mathf.Clamp(auraArcAngle.y, auraArcAngle.x, 170f);
+        auraSurfaceOffset = Mathf.Max(0.001f, auraSurfaceOffset);
+        auraRefreshInterval = Mathf.Max(0.01f, auraRefreshInterval);
+        auraVisibleChance = Mathf.Clamp01(auraVisibleChance);
+        auraIntensity = Mathf.Max(0f, auraIntensity);
+        auraWidth = Mathf.Max(0f, auraWidth);
+        auraBranchesPerArc = Mathf.Clamp(auraBranchesPerArc, 0, 16);
+        auraBranchLength.x = Mathf.Max(0.01f, auraBranchLength.x);
+        auraBranchLength.y = Mathf.Max(auraBranchLength.x, auraBranchLength.y);
+        auraBranchChance = Mathf.Clamp01(auraBranchChance);
+        auraBranchRoughness = Mathf.Max(0f, auraBranchRoughness);
+        auraBranchSpread = Mathf.Clamp(auraBranchSpread, 0f, 2f);
+        auraBranchWidth = Mathf.Max(0f, auraBranchWidth);
     }
 }
