@@ -35,6 +35,13 @@ MonoBehaviour:
     jitterStrength: 0.45
     jitterScale: 6
     jitterSpeed: 3
+    glitchStrength: 0.5
+    glitchBands: 90
+    glitchRate: 14
+    glitchDensity: 0.25
+    glitchShift: 0.015
+    glitchRGBSplit: 0.0022
+    glitchTint: 0.35
     flickerStrength: 0.35
     flickerSpeed: 18
 --- !u!114 &11400000
