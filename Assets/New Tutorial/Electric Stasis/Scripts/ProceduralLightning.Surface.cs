@@ -49,6 +49,10 @@ public partial class ProceduralLightning
     [Tooltip("Tiempo entre regeneraciones del trazado superficial, en segundos. Menor intervalo implica cambios mas rapidos y mas calculos.")]
     [SerializeField] private float surfaceGeometryRefreshInterval = 0.045f;
 
+    [Range(2, 8)]
+    [Tooltip("Cantidad de formas superficiales precalculadas al activar cada instancia. Luego se alternan con Surface Geometry Refresh Interval, conservando un movimiento rapido sin reproyectar contra el collider en cada refresco.")]
+    [SerializeField] private int surfaceCachedGeometryCount = 4;
+
     [Range(0, 8)]
     [Tooltip("Maxima profundidad de subdivision para separar segmentos del collider. Con 0 no refina; valores altos pueden generar mas puntos y trabajo.")]
     [SerializeField] private int surfacePathRefinementDepth = 6;
@@ -84,6 +88,27 @@ public partial class ProceduralLightning
     [Tooltip("Pool propietario al que vuelve esta instancia superficial al terminar su duracion.")]
     private SurfaceLightningFactoryPool surfacePoolOwner;
 
+    [Tooltip("Formas superficiales persistentes. Sus buffers sobreviven al regreso al pool.")]
+    private SurfaceGeometryFrame[] cachedSurfaceGeometries;
+
+    private readonly List<Vector3> firstSurfacePathScratch = new List<Vector3>(64);
+    private readonly List<Vector3> secondSurfacePathScratch = new List<Vector3>(64);
+    private readonly List<Vector3> rawSurfacePathScratch = new List<Vector3>(64);
+    private readonly List<Vector3> branchSurfacePathScratch = new List<Vector3>(32);
+    private float[] firstSurfaceOffsets = new float[0];
+    private float[] secondSurfaceOffsets = new float[0];
+    private readonly List<SurfaceChainPart> surfaceChainBuffer = new List<SurfaceChainPart>(64);
+    private readonly Queue<SurfaceChainPart> pendingSurfaceParts = new Queue<SurfaceChainPart>(64);
+    private readonly HashSet<StasisElectricVisual> visitedSurfaceVisuals = new HashSet<StasisElectricVisual>();
+    private readonly List<StasisElectricVisual> connectedSurfaceVisuals = new List<StasisElectricVisual>(16);
+    private readonly List<SurfaceChainPart> surfaceChainPartPool = new List<SurfaceChainPart>(64);
+    private int surfaceChainPartPoolIndex;
+    private WaitForSeconds cachedSurfacePieceDelay;
+    private float cachedSurfacePieceDelaySeconds = -1f;
+
+    [Tooltip("Forma precalculada mostrada actualmente.")]
+    private int cachedSurfaceGeometryIndex;
+
     private void InitializeSurfaceLightning()
     {
         isSurfaceInstance = false;
@@ -97,6 +122,7 @@ public partial class ProceduralLightning
         surfaceCoverageVariation = Mathf.Clamp01(surfaceCoverageVariation);
         surfaceLineOffset = Mathf.Max(0f, surfaceLineOffset);
         surfaceGeometryRefreshInterval = Mathf.Max(0.001f, surfaceGeometryRefreshInterval);
+        surfaceCachedGeometryCount = Mathf.Clamp(surfaceCachedGeometryCount, 2, 8);
         surfacePathRefinementDepth = Mathf.Clamp(surfacePathRefinementDepth, 0, 8);
         surfaceMinimumClearance = Mathf.Max(0.0001f, surfaceMinimumClearance);
     }
@@ -131,38 +157,39 @@ public partial class ProceduralLightning
 
     private List<SurfaceChainPart> BuildSurfaceChain(Transform impactedTransform)
     {
-        List<SurfaceChainPart> chain = new List<SurfaceChainPart>();
+        surfaceChainBuffer.Clear();
+        pendingSurfaceParts.Clear();
+        visitedSurfaceVisuals.Clear();
+        surfaceChainPartPoolIndex = 0;
         Transform firstTransform = GetFirstSurfaceStasisTransform(impactedTransform);
 
         if (firstTransform == null)
-            return chain;
+            return surfaceChainBuffer;
 
         StasisElectricVisual firstVisual = firstTransform.GetComponent<StasisElectricVisual>();
 
         if (firstVisual == null)
-            return chain;
+            return surfaceChainBuffer;
 
         Collider impactedCollider = impactedTransform.GetComponent<Collider>();
         Collider firstCollider = impactedCollider != null ? impactedCollider : firstVisual.GetSurfaceCollider();
 
         if (firstCollider == null)
-            return chain;
+            return surfaceChainBuffer;
 
-        Queue<SurfaceChainPart> pendingParts = new Queue<SurfaceChainPart>();
-        HashSet<StasisElectricVisual> visitedVisuals = new HashSet<StasisElectricVisual>();
-        SurfaceChainPart firstPart = new SurfaceChainPart(firstVisual, firstCollider, null, 0);
-        pendingParts.Enqueue(firstPart);
-        visitedVisuals.Add(firstVisual);
+        SurfaceChainPart firstPart = GetSurfaceChainPart(firstVisual, firstCollider, null, 0);
+        pendingSurfaceParts.Enqueue(firstPart);
+        visitedSurfaceVisuals.Add(firstVisual);
 
-        while (pendingParts.Count > 0)
+        while (pendingSurfaceParts.Count > 0)
         {
-            SurfaceChainPart currentPart = pendingParts.Dequeue();
-            chain.Add(currentPart);
-            List<StasisElectricVisual> connectedVisuals = GetConnectedStasisVisuals(currentPart.Visual);
+            SurfaceChainPart currentPart = pendingSurfaceParts.Dequeue();
+            surfaceChainBuffer.Add(currentPart);
+            GetConnectedStasisVisuals(currentPart.Visual, connectedSurfaceVisuals);
 
-            foreach (StasisElectricVisual connectedVisual in connectedVisuals)
+            foreach (StasisElectricVisual connectedVisual in connectedSurfaceVisuals)
             {
-                if (connectedVisual == null || visitedVisuals.Contains(connectedVisual))
+                if (connectedVisual == null || visitedSurfaceVisuals.Contains(connectedVisual))
                     continue;
 
                 Collider connectedCollider = connectedVisual.GetSurfaceCollider();
@@ -175,17 +202,17 @@ public partial class ProceduralLightning
                     continue;
                 }
 
-                visitedVisuals.Add(connectedVisual);
-                pendingParts.Enqueue(new SurfaceChainPart(connectedVisual, connectedCollider, currentPart, currentPart.Depth + 1));
+                visitedSurfaceVisuals.Add(connectedVisual);
+                pendingSurfaceParts.Enqueue(GetSurfaceChainPart(connectedVisual, connectedCollider, currentPart, currentPart.Depth + 1));
             }
         }
 
-        return chain;
+        return surfaceChainBuffer;
     }
 
-    private static List<StasisElectricVisual> GetConnectedStasisVisuals(StasisElectricVisual currentVisual)
+    private void GetConnectedStasisVisuals(StasisElectricVisual currentVisual, List<StasisElectricVisual> connectedVisuals)
     {
-        List<StasisElectricVisual> connectedVisuals = new List<StasisElectricVisual>();
+        connectedVisuals.Clear();
 
         if (currentVisual.ConnectionMode == StasisConnectionMode.Arms)
         {
@@ -197,7 +224,25 @@ public partial class ProceduralLightning
             AddFanSiblings(currentVisual, connectedVisuals);
         }
 
-        return connectedVisuals;
+    }
+
+    private SurfaceChainPart GetSurfaceChainPart(StasisElectricVisual visual, Collider surfaceCollider, SurfaceChainPart sourcePart, int depth)
+    {
+        SurfaceChainPart part;
+
+        if (surfaceChainPartPoolIndex < surfaceChainPartPool.Count)
+        {
+            part = surfaceChainPartPool[surfaceChainPartPoolIndex];
+        }
+        else
+        {
+            part = new SurfaceChainPart();
+            surfaceChainPartPool.Add(part);
+        }
+
+        surfaceChainPartPoolIndex++;
+        part.Set(visual, surfaceCollider, sourcePart, depth);
+        return part;
     }
 
     private static void AddArmParent(StasisElectricVisual currentVisual, List<StasisElectricVisual> connectedVisuals)
@@ -295,7 +340,15 @@ public partial class ProceduralLightning
             }
 
             if (delayBetweenSurfacePieces > 0f)
-                yield return new WaitForSeconds(delayBetweenSurfacePieces);
+            {
+                if (cachedSurfacePieceDelay == null || !Mathf.Approximately(cachedSurfacePieceDelaySeconds, delayBetweenSurfacePieces))
+                {
+                    cachedSurfacePieceDelaySeconds = delayBetweenSurfacePieces;
+                    cachedSurfacePieceDelay = new WaitForSeconds(delayBetweenSurfacePieces);
+                }
+
+                yield return cachedSurfacePieceDelay;
+            }
         }
 
         surfacePropagationRoutine = null;
@@ -387,11 +440,13 @@ public partial class ProceduralLightning
         surfaceGenerationIndex = generationSeed * 1009;
         surfaceInstanceElapsedTime = 0f;
         surfaceGeometryRefreshTimer = 0f;
+        cachedSurfaceGeometryIndex = 0;
         isPlaying = true;
         isMainBoltVisible = true;
         ConfigureSurfaceLineRenderers();
         SetBoltRenderersEnabled(true);
-        GenerateSurfaceGeometry();
+        BuildSurfaceGeometryCache();
+        surfaceGeometryRefreshTimer = Mathf.Max(0.001f, surfaceGeometryRefreshInterval);
         ApplyVisualIntensity(1f);
     }
 
@@ -413,6 +468,7 @@ public partial class ProceduralLightning
         instanceIncludesConnection = false;
         surfaceInstanceElapsedTime = 0f;
         surfaceGeometryRefreshTimer = 0f;
+        cachedSurfaceGeometryIndex = 0;
         ApplyVisualIntensity(0f);
         SetBoltRenderersEnabled(false);
     }
@@ -461,9 +517,8 @@ public partial class ProceduralLightning
 
         if (surfaceGeometryRefreshTimer <= 0f)
         {
-            surfaceGenerationIndex++;
-            GenerateSurfaceGeometry();
-            surfaceGeometryRefreshTimer = surfaceGeometryRefreshInterval;
+            ShowNextCachedSurfaceGeometry();
+            surfaceGeometryRefreshTimer = Mathf.Max(0.001f, surfaceGeometryRefreshInterval);
         }
 
         float progress = Mathf.Clamp01(surfaceInstanceElapsedTime / burstDuration);
@@ -483,43 +538,86 @@ public partial class ProceduralLightning
         Destroy(gameObject);
     }
 
-    private void GenerateSurfaceGeometry()
+    private void BuildSurfaceGeometryCache()
     {
-        if (instanceSurfaceCollider == null)
-            return;
+        int geometryCount = Mathf.Clamp(surfaceCachedGeometryCount, 2, 8);
+        int branchCount = branchRenderers == null ? 0 : branchRenderers.Length;
+        int originalGenerationIndex = surfaceGenerationIndex;
 
-        int firstPathSegmentCount = Mathf.Max(2, mainSegmentCount / 2);
-        int secondPathSegmentCount = Mathf.Max(2, mainSegmentCount - firstPathSegmentCount);
-        Vector3[] firstSurfacePath = GenerateProjectedSurfacePath(instanceSurfaceCollider, instanceEntryPosition, instanceWaypointPosition, firstPathSegmentCount, mainDisplacement * surfaceMainRoughness, surfaceGenerationIndex + noiseSeed);
-        Vector3[] secondSurfacePath = GenerateProjectedSurfacePath(instanceSurfaceCollider, instanceWaypointPosition, instanceExitPosition, secondPathSegmentCount, mainDisplacement * surfaceMainRoughness, surfaceGenerationIndex + noiseSeed + 7919);
-        Vector3[] surfacePositions = CombineSurfacePaths(firstSurfacePath, secondSurfacePath);
+        EnsureSurfaceGeometryCache(geometryCount, branchCount);
 
-        if (surfacePositions == null || surfacePositions.Length == 0)
-            return;
+        for (int geometryIndex = 0; geometryIndex < geometryCount; geometryIndex++)
+        {
+            surfaceGenerationIndex = originalGenerationIndex + geometryIndex;
+            GenerateSurfaceGeometryNonAlloc(cachedSurfaceGeometries[geometryIndex]);
+        }
 
-        int connectionPointCount = instanceIncludesConnection ? 1 : 0;
-        mainPositions = new Vector3[surfacePositions.Length + connectionPointCount];
-        System.Array.Copy(surfacePositions, 0, mainPositions, 0, surfacePositions.Length);
-
-        if (instanceIncludesConnection)
-            mainPositions[mainPositions.Length - 1] = instanceConnectionPosition;
-
-        if (mainGlowRenderer != null)
-            mainGlowRenderer.positionCount = mainPositions.Length;
-
-        if (mainCoreRenderer != null)
-            mainCoreRenderer.positionCount = mainPositions.Length;
-
-        ApplyMainBoltPositions();
-        GenerateSurfaceBranches();
+        surfaceGenerationIndex = originalGenerationIndex;
+        cachedSurfaceGeometryIndex = 0;
+        ApplyCachedSurfaceGeometry(cachedSurfaceGeometryIndex);
     }
 
-    private void GenerateSurfaceBranches()
+    private void EnsureSurfaceGeometryCache(int geometryCount, int branchCount)
     {
-        if (branchRenderers == null || branchRenderers.Length == 0)
+        if (cachedSurfaceGeometries == null || cachedSurfaceGeometries.Length != geometryCount)
+            cachedSurfaceGeometries = new SurfaceGeometryFrame[geometryCount];
+
+        for (int geometryIndex = 0; geometryIndex < geometryCount; geometryIndex++)
+        {
+            SurfaceGeometryFrame frame = cachedSurfaceGeometries[geometryIndex];
+
+            if (frame == null)
+            {
+                frame = new SurfaceGeometryFrame();
+                cachedSurfaceGeometries[geometryIndex] = frame;
+            }
+
+            frame.EnsureBranchCount(branchCount);
+        }
+    }
+
+    private void ShowNextCachedSurfaceGeometry()
+    {
+        if (cachedSurfaceGeometries == null || cachedSurfaceGeometries.Length == 0)
             return;
 
-        System.Random random = new System.Random(surfaceGenerationIndex + noiseSeed * 31);
+        cachedSurfaceGeometryIndex++;
+
+        if (cachedSurfaceGeometryIndex >= cachedSurfaceGeometries.Length)
+            cachedSurfaceGeometryIndex = 0;
+
+        ApplyCachedSurfaceGeometry(cachedSurfaceGeometryIndex);
+    }
+
+    private void ApplyCachedSurfaceGeometry(int geometryIndex)
+    {
+        if (cachedSurfaceGeometries == null)
+            return;
+
+        if (geometryIndex < 0 || geometryIndex >= cachedSurfaceGeometries.Length)
+            return;
+
+        SurfaceGeometryFrame frame = cachedSurfaceGeometries[geometryIndex];
+
+        if (frame == null || frame.MainCount <= 0)
+            return;
+
+        mainPositions = frame.MainPositions;
+
+        if (mainGlowRenderer != null)
+        {
+            mainGlowRenderer.positionCount = frame.MainCount;
+            mainGlowRenderer.SetPositions(frame.MainPositions);
+        }
+
+        if (mainCoreRenderer != null)
+        {
+            mainCoreRenderer.positionCount = frame.MainCount;
+            mainCoreRenderer.SetPositions(frame.MainPositions);
+        }
+
+        if (branchRenderers == null)
+            return;
 
         for (int branchIndex = 0; branchIndex < branchRenderers.Length; branchIndex++)
         {
@@ -528,75 +626,143 @@ public partial class ProceduralLightning
             if (branch == null)
                 continue;
 
-            branch.isVisible = random.NextDouble() <= branchVisibleChance;
-            SetBranchRendererEnabled(branch, branch.isVisible);
+            bool visible = branchIndex < frame.BranchVisibility.Length &&
+                           frame.BranchVisibility[branchIndex];
 
-            if (!branch.isVisible)
+            branch.isVisible = visible;
+            SetBranchRendererEnabled(branch, visible);
+
+            if (!visible || branchIndex >= frame.BranchPositions.Length)
                 continue;
 
-            int lastSurfaceIndex = instanceIncludesConnection ? mainPositions.Length - 2 : mainPositions.Length - 1;
+            Vector3[] cachedPositions = frame.BranchPositions[branchIndex];
+            int cachedCount = frame.BranchCounts[branchIndex];
+
+            if (cachedPositions == null || cachedCount <= 0)
+                continue;
+
+            branch.positions = cachedPositions;
+
+            if (branch.glowRenderer != null)
+            {
+                branch.glowRenderer.positionCount = cachedCount;
+                branch.glowRenderer.SetPositions(cachedPositions);
+            }
+
+            if (branch.coreRenderer != null)
+            {
+                branch.coreRenderer.positionCount = cachedCount;
+                branch.coreRenderer.SetPositions(cachedPositions);
+            }
+        }
+    }
+
+    private void GenerateSurfaceGeometryNonAlloc(SurfaceGeometryFrame frame)
+    {
+        if (instanceSurfaceCollider == null || frame == null)
+            return;
+
+        int firstPathSegmentCount = Mathf.Max(2, mainSegmentCount / 2);
+        int secondPathSegmentCount = Mathf.Max(2, mainSegmentCount - firstPathSegmentCount);
+        GenerateProjectedSurfacePathNonAlloc(instanceSurfaceCollider, instanceEntryPosition, instanceWaypointPosition, firstPathSegmentCount, mainDisplacement * surfaceMainRoughness, surfaceGenerationIndex + noiseSeed, firstSurfacePathScratch);
+        GenerateProjectedSurfacePathNonAlloc(instanceSurfaceCollider, instanceWaypointPosition, instanceExitPosition, secondPathSegmentCount, mainDisplacement * surfaceMainRoughness, surfaceGenerationIndex + noiseSeed + 7919, secondSurfacePathScratch);
+
+        if (firstSurfacePathScratch.Count == 0 || secondSurfacePathScratch.Count == 0)
+        {
+            frame.MainCount = 0;
+            return;
+        }
+
+        int connectionPointCount = instanceIncludesConnection ? 1 : 0;
+        int requiredMainCount = firstSurfacePathScratch.Count + secondSurfacePathScratch.Count - 1 + connectionPointCount;
+        EnsureVectorBuffer(ref frame.MainPositions, requiredMainCount);
+        int writeIndex = 0;
+
+        for (int index = 0; index < firstSurfacePathScratch.Count; index++)
+            frame.MainPositions[writeIndex++] = firstSurfacePathScratch[index];
+
+        for (int index = 1; index < secondSurfacePathScratch.Count; index++)
+            frame.MainPositions[writeIndex++] = secondSurfacePathScratch[index];
+
+        if (instanceIncludesConnection)
+            frame.MainPositions[writeIndex++] = instanceConnectionPosition;
+
+        frame.MainCount = writeIndex;
+        GenerateSurfaceBranchesNonAlloc(frame);
+    }
+
+    private void GenerateSurfaceBranchesNonAlloc(SurfaceGeometryFrame frame)
+    {
+        if (branchRenderers == null || branchRenderers.Length == 0)
+            return;
+
+        uint randomState = CreateSurfaceRandomState(surfaceGenerationIndex + noiseSeed * 31);
+
+        for (int branchIndex = 0; branchIndex < branchRenderers.Length; branchIndex++)
+        {
+            LightningBranchRenderer branch = branchRenderers[branchIndex];
+
+            if (branch == null)
+                continue;
+
+            bool visible = NextSurfaceRandom01(ref randomState) <= branchVisibleChance;
+            frame.BranchVisibility[branchIndex] = visible;
+            frame.BranchCounts[branchIndex] = 0;
+
+            if (!visible)
+                continue;
+
+            int lastSurfaceIndex = instanceIncludesConnection ? frame.MainCount - 2 : frame.MainCount - 1;
 
             if (lastSurfaceIndex < 2)
             {
-                branch.isVisible = false;
-                SetBranchRendererEnabled(branch, false);
+                frame.BranchVisibility[branchIndex] = false;
                 continue;
             }
 
             int minimumStartIndex = Mathf.Clamp(Mathf.RoundToInt(lastSurfaceIndex * minimumBranchStart), 1, lastSurfaceIndex - 1);
             int maximumStartIndex = Mathf.Clamp(Mathf.RoundToInt(lastSurfaceIndex * maximumBranchStart), minimumStartIndex, lastSurfaceIndex - 1);
-            int branchStartIndex = random.Next(minimumStartIndex, maximumStartIndex + 1);
-            Vector3 branchStartPosition = mainPositions[branchStartIndex];
+            int branchStartIndex = NextSurfaceRandomRange(ref randomState, minimumStartIndex, maximumStartIndex + 1);
+            Vector3 branchStartPosition = frame.MainPositions[branchStartIndex];
             Vector3 center = instanceSurfaceCollider.bounds.center;
             Vector3 surfaceDirection = GetSurfaceSafeDirection(branchStartPosition - center, instanceSurfaceCollider.transform.up);
             CreatePerpendicularAxes(surfaceDirection, out Vector3 surfaceTangent, out Vector3 surfaceBinormal);
-            float angle = (float)random.NextDouble() * Mathf.PI * 2f;
-            float lengthRatio = Mathf.Lerp(minimumBranchLengthRatio, maximumBranchLengthRatio, (float)random.NextDouble());
+            float angle = NextSurfaceRandom01(ref randomState) * Mathf.PI * 2f;
+            float lengthRatio = Mathf.Lerp(minimumBranchLengthRatio, maximumBranchLengthRatio, NextSurfaceRandom01(ref randomState));
             float wrapAmount = surfaceBranchWrapAmount * Mathf.Lerp(0.65f, 1.35f, lengthRatio / Mathf.Max(maximumBranchLengthRatio, 0.001f));
             Vector3 wrappingDirection = surfaceTangent * Mathf.Cos(angle) + surfaceBinormal * Mathf.Sin(angle);
             Vector3 branchEndDirection = (surfaceDirection + wrappingDirection * wrapAmount).normalized;
             Vector3 branchOutsideTarget = center + branchEndDirection * (instanceSurfaceCollider.bounds.extents.magnitude + 1f);
             Vector3 branchEndPosition = ProjectOutsidePointToSurface(instanceSurfaceCollider, branchOutsideTarget);
-            branch.positions = GenerateProjectedSurfacePath(instanceSurfaceCollider, branchStartPosition, branchEndPosition, branchSegmentCount, branchDisplacement, surfaceGenerationIndex + branchIndex * 127 + 7001);
+            GenerateProjectedSurfacePathNonAlloc(instanceSurfaceCollider, branchStartPosition, branchEndPosition, branchSegmentCount, branchDisplacement, surfaceGenerationIndex + branchIndex * 127 + 7001, branchSurfacePathScratch);
 
-            for (int pointIndex = 0; pointIndex < branch.positions.Length; pointIndex++)
-                branch.positions[pointIndex] = ProjectOutsidePointToSurface(instanceSurfaceCollider, branch.positions[pointIndex]);
+            EnsureVectorBuffer(ref frame.BranchPositions[branchIndex], branchSurfacePathScratch.Count);
 
-            if (branch.glowRenderer != null)
-                branch.glowRenderer.positionCount = branch.positions.Length;
+            for (int pointIndex = 0; pointIndex < branchSurfacePathScratch.Count; pointIndex++)
+            {
+                frame.BranchPositions[branchIndex][pointIndex] =
+                    ProjectOutsidePointToSurface(instanceSurfaceCollider, branchSurfacePathScratch[pointIndex]);
+            }
 
-            if (branch.coreRenderer != null)
-                branch.coreRenderer.positionCount = branch.positions.Length;
-
-            ApplyBranchPositions(branch);
+            frame.BranchCounts[branchIndex] = branchSurfacePathScratch.Count;
         }
     }
 
-    private static Vector3[] CombineSurfacePaths(Vector3[] firstPath, Vector3[] secondPath)
-    {
-        if (firstPath == null || firstPath.Length == 0)
-            return secondPath;
-
-        if (secondPath == null || secondPath.Length == 0)
-            return firstPath;
-
-        Vector3[] combinedPath = new Vector3[firstPath.Length + secondPath.Length - 1];
-        System.Array.Copy(firstPath, 0, combinedPath, 0, firstPath.Length);
-        System.Array.Copy(secondPath, 1, combinedPath, firstPath.Length, secondPath.Length - 1);
-        return combinedPath;
-    }
-
-    private Vector3[] GenerateProjectedSurfacePath(Collider surfaceCollider, Vector3 startPosition, Vector3 endPosition, int segmentCount, float displacement, int seed)
+    private void GenerateProjectedSurfacePathNonAlloc(Collider surfaceCollider, Vector3 startPosition, Vector3 endPosition, int segmentCount, float displacement, int seed, List<Vector3> result)
     {
         segmentCount = Mathf.Max(2, segmentCount);
-        Vector3[] positions = new Vector3[segmentCount + 1];
+        result.Clear();
+        rawSurfacePathScratch.Clear();
+        EnsureFloatBuffer(ref firstSurfaceOffsets, segmentCount + 1);
+        EnsureFloatBuffer(ref secondSurfaceOffsets, segmentCount + 1);
+        BuildSurfaceFractalOffsetsNonAlloc(firstSurfaceOffsets, segmentCount, seed);
+        BuildSurfaceFractalOffsetsNonAlloc(secondSurfaceOffsets, segmentCount, seed + 479);
+
         Vector3 center = surfaceCollider.bounds.center;
         Vector3 projectedStart = ProjectOutsidePointToSurface(surfaceCollider, startPosition);
         Vector3 projectedEnd = ProjectOutsidePointToSurface(surfaceCollider, endPosition);
         Vector3 startDirection = GetSurfaceSafeDirection(projectedStart - center, surfaceCollider.transform.up);
         Vector3 endDirection = GetSurfaceSafeDirection(projectedEnd - center, -startDirection);
-        float[] firstOffsets = BuildSurfaceFractalOffsets(segmentCount, seed);
-        float[] secondOffsets = BuildSurfaceFractalOffsets(segmentCount, seed + 479);
         float outsideDistance = surfaceCollider.bounds.extents.magnitude + 1f;
 
         for (int index = 0; index <= segmentCount; index++)
@@ -605,29 +771,26 @@ public partial class ProceduralLightning
             float envelope = Mathf.Sin(progress * Mathf.PI);
             Vector3 radialDirection = Vector3.Slerp(startDirection, endDirection, progress).normalized;
             CreatePerpendicularAxes(radialDirection, out Vector3 tangent, out Vector3 binormal);
-            Vector3 irregularDirection = radialDirection + tangent * firstOffsets[index] * displacement * envelope + binormal * secondOffsets[index] * displacement * envelope;
+            Vector3 irregularDirection = radialDirection + tangent * firstSurfaceOffsets[index] * displacement * envelope + binormal * secondSurfaceOffsets[index] * displacement * envelope;
             irregularDirection.Normalize();
             Vector3 outsidePosition = center + irregularDirection * outsideDistance;
-            positions[index] = ProjectOutsidePointToSurface(surfaceCollider, outsidePosition);
+            rawSurfacePathScratch.Add(ProjectOutsidePointToSurface(surfaceCollider, outsidePosition));
         }
 
-        positions[0] = projectedStart;
-        positions[positions.Length - 1] = projectedEnd;
-        return RefineSurfacePath(surfaceCollider, positions);
-    }
+        rawSurfacePathScratch[0] = projectedStart;
+        rawSurfacePathScratch[rawSurfacePathScratch.Count - 1] = projectedEnd;
+        result.Add(rawSurfacePathScratch[0]);
 
-    private Vector3[] RefineSurfacePath(Collider surfaceCollider, Vector3[] originalPositions)
-    {
-        if (surfacePathRefinementDepth <= 0 || originalPositions == null || originalPositions.Length < 2)
-            return originalPositions;
+        if (surfacePathRefinementDepth <= 0)
+        {
+            for (int index = 1; index < rawSurfacePathScratch.Count; index++)
+                result.Add(rawSurfacePathScratch[index]);
 
-        List<Vector3> refinedPositions = new List<Vector3>();
-        refinedPositions.Add(originalPositions[0]);
+            return;
+        }
 
-        for (int index = 0; index < originalPositions.Length - 1; index++)
-            RefineSurfaceSegment(surfaceCollider, originalPositions[index], originalPositions[index + 1], 0, refinedPositions);
-
-        return refinedPositions.ToArray();
+        for (int index = 0; index < rawSurfacePathScratch.Count - 1; index++)
+            RefineSurfaceSegment(surfaceCollider, rawSurfacePathScratch[index], rawSurfacePathScratch[index + 1], 0, result);
     }
 
     private void RefineSurfaceSegment(Collider surfaceCollider, Vector3 startPosition, Vector3 endPosition, int depth, List<Vector3> refinedPositions)
@@ -676,27 +839,68 @@ public partial class ProceduralLightning
         return ProjectOutsidePointToSurface(surfaceCollider, center + oppositeDirection * (surfaceCollider.bounds.extents.magnitude + 1f));
     }
 
-    private float[] BuildSurfaceFractalOffsets(int segmentCount, int seed)
+    private void BuildSurfaceFractalOffsetsNonAlloc(float[] offsets, int segmentCount, int seed)
     {
-        float[] offsets = new float[segmentCount + 1];
-        System.Random random = new System.Random(seed);
-        SubdivideSurfaceOffsets(offsets, 0, segmentCount, 1f, random);
+        System.Array.Clear(offsets, 0, segmentCount + 1);
+        uint randomState = CreateSurfaceRandomState(seed);
+        SubdivideSurfaceOffsets(offsets, 0, segmentCount, 1f, ref randomState);
         offsets[0] = 0f;
-        offsets[offsets.Length - 1] = 0f;
-        return offsets;
+        offsets[segmentCount] = 0f;
     }
 
-    private void SubdivideSurfaceOffsets(float[] offsets, int leftIndex, int rightIndex, float amplitude, System.Random random)
+    private void SubdivideSurfaceOffsets(float[] offsets, int leftIndex, int rightIndex, float amplitude, ref uint randomState)
     {
         if (rightIndex - leftIndex <= 1)
             return;
 
         int middleIndex = (leftIndex + rightIndex) / 2;
         float average = (offsets[leftIndex] + offsets[rightIndex]) * 0.5f;
-        offsets[middleIndex] = average + ((float)random.NextDouble() * 2f - 1f) * amplitude;
+        offsets[middleIndex] = average + (NextSurfaceRandom01(ref randomState) * 2f - 1f) * amplitude;
         float nextAmplitude = amplitude * surfaceFractalDecay;
-        SubdivideSurfaceOffsets(offsets, leftIndex, middleIndex, nextAmplitude, random);
-        SubdivideSurfaceOffsets(offsets, middleIndex, rightIndex, nextAmplitude, random);
+        SubdivideSurfaceOffsets(offsets, leftIndex, middleIndex, nextAmplitude, ref randomState);
+        SubdivideSurfaceOffsets(offsets, middleIndex, rightIndex, nextAmplitude, ref randomState);
+    }
+
+    private static void EnsureVectorBuffer(ref Vector3[] buffer, int requiredCount)
+    {
+        if (buffer != null && buffer.Length >= requiredCount)
+            return;
+
+        int capacity = Mathf.NextPowerOfTwo(Mathf.Max(4, requiredCount));
+        buffer = new Vector3[capacity];
+    }
+
+    private static void EnsureFloatBuffer(ref float[] buffer, int requiredCount)
+    {
+        if (buffer != null && buffer.Length >= requiredCount)
+            return;
+
+        int capacity = Mathf.NextPowerOfTwo(Mathf.Max(4, requiredCount));
+        buffer = new float[capacity];
+    }
+
+    private static uint CreateSurfaceRandomState(int seed)
+    {
+        uint state = unchecked((uint)seed) ^ 0xA3C59AC3u;
+        return state == 0u ? 1u : state;
+    }
+
+    private static float NextSurfaceRandom01(ref uint state)
+    {
+        state ^= state << 13;
+        state ^= state >> 17;
+        state ^= state << 5;
+        return (state & 0x00FFFFFFu) / 16777216f;
+    }
+
+    private static int NextSurfaceRandomRange(ref uint state, int minimumInclusive, int maximumExclusive)
+    {
+        if (maximumExclusive <= minimumInclusive)
+            return minimumInclusive;
+
+        float value = NextSurfaceRandom01(ref state);
+        int range = maximumExclusive - minimumInclusive;
+        return minimumInclusive + Mathf.Min(range - 1, Mathf.FloorToInt(value * range));
     }
 
     private static Vector3 GetSurfaceSafeDirection(Vector3 direction, Vector3 fallback)
@@ -707,14 +911,39 @@ public partial class ProceduralLightning
         return direction.normalized;
     }
 
+    private sealed class SurfaceGeometryFrame
+    {
+        public Vector3[] MainPositions;
+        public int MainCount;
+        public Vector3[][] BranchPositions = new Vector3[0][];
+        public int[] BranchCounts = new int[0];
+        public bool[] BranchVisibility = new bool[0];
+
+        public void EnsureBranchCount(int branchCount)
+        {
+            if (BranchPositions.Length == branchCount)
+                return;
+
+            Vector3[][] previousPositions = BranchPositions;
+            BranchPositions = new Vector3[branchCount][];
+            BranchCounts = new int[branchCount];
+            BranchVisibility = new bool[branchCount];
+
+            int copyCount = Mathf.Min(previousPositions.Length, branchCount);
+
+            for (int index = 0; index < copyCount; index++)
+                BranchPositions[index] = previousPositions[index];
+        }
+    }
+
     private sealed class SurfaceChainPart
     {
-        public StasisElectricVisual Visual { get; }
-        public Collider SurfaceCollider { get; }
-        public SurfaceChainPart SourcePart { get; }
-        public int Depth { get; }
+        public StasisElectricVisual Visual { get; private set; }
+        public Collider SurfaceCollider { get; private set; }
+        public SurfaceChainPart SourcePart { get; private set; }
+        public int Depth { get; private set; }
 
-        public SurfaceChainPart(StasisElectricVisual visual, Collider surfaceCollider, SurfaceChainPart sourcePart, int depth)
+        public void Set(StasisElectricVisual visual, Collider surfaceCollider, SurfaceChainPart sourcePart, int depth)
         {
             Visual = visual;
             SurfaceCollider = surfaceCollider;

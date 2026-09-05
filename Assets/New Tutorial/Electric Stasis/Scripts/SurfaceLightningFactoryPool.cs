@@ -9,10 +9,14 @@ public class SurfaceLightningFactoryPool : MonoBehaviour
 
     [Header("Pool")]
     [Min(0)]
-    [SerializeField] private int initialCapacity = 12;
+    [Tooltip("Cantidad de instancias creadas antes del primer disparo. Para un brazo que puede usar 80 rayos, conviene precalentar las 80 y evitar Instantiate durante el efecto.")]
+    [SerializeField] private int initialCapacity = 80;
 
     [Min(1)]
-    [SerializeField] private int maximumCapacity = 40;
+    [SerializeField] private int maximumCapacity = 80;
+
+    [Tooltip("Si esta activo, crea Maximum Capacity completa en Awake. Evita Instantiate durante el primer disparo a cambio de una carga inicial mayor.")]
+    [SerializeField] private bool prewarmMaximumCapacity = true;
 
     private readonly Queue<ProceduralLightning> availableInstances =
         new Queue<ProceduralLightning>();
@@ -27,7 +31,9 @@ public class SurfaceLightningFactoryPool : MonoBehaviour
         maximumCapacity = Mathf.Max(1, maximumCapacity);
         initialCapacity = Mathf.Clamp(initialCapacity, 0, maximumCapacity);
 
-        for (int index = 0; index < initialCapacity; index++)
+        int preloadCount = prewarmMaximumCapacity ? maximumCapacity : initialCapacity;
+
+        for (int index = 0; index < preloadCount; index++)
         {
             ProceduralLightning instance = CreateInstance();
 

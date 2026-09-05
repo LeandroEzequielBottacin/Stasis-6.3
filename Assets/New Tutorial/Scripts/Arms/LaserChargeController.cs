@@ -1,9 +1,9 @@
 using Player.Stasis;
 using Puzzle_Elements;
+using Action = System.Action;
 using System.Linq;
 using UIScripts.FeedBack_UI.Crosshair;
 using UnityEngine;
-using UnityEngine.Events;
 
 [DisallowMultipleComponent]
 public class LaserChargeController : MonoBehaviour
@@ -138,18 +138,15 @@ public class LaserChargeController : MonoBehaviour
     [Tooltip("Cantidad maxima de particulas y tamano del buffer reutilizado para actualizarlas. Se configura al iniciar.")]
     [SerializeField] private int maxParticles = 512;
 
-    [Header("Eventos")]
-    [Tooltip("Evento ejecutado al comenzar una carga, despues de activar y actualizar sus efectos visuales.")]
-    [SerializeField] private UnityEvent onChargeStarted = new UnityEvent();
-
-    [Tooltip("Evento ejecutado al completar la carga y entrar en Ready, antes del disparo automatico si corresponde.")]
-    [SerializeField] private UnityEvent onFullyCharged = new UnityEvent();
-
-    [Tooltip("Evento del disparo real, despues de que terminan las particulas y rayos entrantes. El laser asignado ya se reproduce desde Shoot.")]
-    [SerializeField] private UnityEvent onFire = new UnityEvent();
-
-    [Tooltip("Evento ejecutado cuando se cancela una carga activa o lista. No se ejecuta si ya estaba en Idle.")]
-    [SerializeField] private UnityEvent onChargeCancelled = new UnityEvent();
+    // Eventos C# para que otros sistemas, como el controlador de sonido,
+    // puedan suscribirse y desuscribirse mediante += y -=.
+    public Action ChargeStarted;
+    public Action FullyCharged;
+    public Action FireSequenceStarted;
+    public Action LaserFired;
+    public Action FireCompleted;
+    public Action AfterFireFinished;
+    public Action ChargeCancelled;
 
     public ChargeState State { get; private set; }
     public float Charge01 { get; private set; }
@@ -527,13 +524,13 @@ public class LaserChargeController : MonoBehaviour
             particlesIn.Play(false);
 
         UpdateVisuals(0f);
-        onChargeStarted.Invoke();
+        ChargeStarted?.Invoke();
     }
 
     public void Shoot(Transform target)
     {
         Vector3 start = origin.position;
-    
+
         Vector3 direction = target.position - start;
         Vector3 end = start + direction * _rayDistance;
 
@@ -693,6 +690,7 @@ public class LaserChargeController : MonoBehaviour
                 State = ChargeState.Idle;
                 Charge01 = 0f;
                 HideVisuals();
+                AfterFireFinished?.Invoke();
                 return;
             }
 
@@ -715,7 +713,7 @@ public class LaserChargeController : MonoBehaviour
         if (State == ChargeState.Charging && Charge01 >= 1f)
         {
             State = ChargeState.Ready;
-            onFullyCharged.Invoke();
+            FullyCharged?.Invoke();
 
             if (autoFire && State == ChargeState.Ready)
                 Fire();
@@ -734,6 +732,8 @@ public class LaserChargeController : MonoBehaviour
         State = ChargeState.FinishingIntake;
         rayBudget = 0f;
         particleBudget = 0f;
+
+        FireSequenceStarted?.Invoke();
 
         TryCompleteFire();
     }
@@ -766,8 +766,12 @@ public class LaserChargeController : MonoBehaviour
             HideVisuals();
         }
 
+        LaserFired?.Invoke();
         Shoot(target);
-        onFire.Invoke();
+        FireCompleted?.Invoke();
+
+        if (remainingLifeTime <= 0f)
+            AfterFireFinished?.Invoke();
     }
 
     [ContextMenu("Play / Cancel Charge")]
@@ -784,7 +788,7 @@ public class LaserChargeController : MonoBehaviour
         HideVisuals();
 
         if (wasActive)
-            onChargeCancelled.Invoke();
+            ChargeCancelled?.Invoke();
     }
 
     private void UpdateVisuals(float dt)
